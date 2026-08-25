@@ -690,8 +690,8 @@ footer a{color:var(--ink-2)}
 
     <div class="scroller"><table id="cov-table"><thead></thead><tbody></tbody></table></div>
     <div class="legend">
-      <div><span class="cov f">&#9679;</span> Prevented by a control in this path</div>
-      <div><span class="cov p">&#9678;</span> Detected or blast radius reduced</div>
+      <div><span class="cov f">&#10003;</span> Prevented by a control in this path</div>
+      <div><span class="cov p">&#9680;</span> Detected or blast radius reduced</div>
       <div><span class="cov n">&mdash;</span> Not covered</div>
     </div>
 
@@ -1370,7 +1370,7 @@ const FORMULA = [
   const t=document.getElementById("cov-table");
   t.querySelector("thead").innerHTML='<tr><th>Incident</th><th>Decisive control</th>'+
     PATHS.map(p=>'<th class="pcol">'+p.id+'</th>').join('')+'<th>Notes</th></tr>';
-  const gl={f:'&#9679;',p:'&#9678;',n:'&mdash;'};
+  const gl={f:'&#10003;',p:'&#9680;',n:'&mdash;'};
   const tt={f:'Prevented',p:'Partial',n:'Not covered'};
   t.querySelector("tbody").innerHTML=COVER.map(c=>
     '<tr><td class="kcell"><strong>'+c.k+'</strong><span>'+c.y+'</span></td>'+

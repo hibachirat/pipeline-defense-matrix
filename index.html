@@ -1,0 +1,1607 @@
+<title>Pipeline Defense Matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F2F4F6;
+  --surface:#FFFFFF;
+  --surface-2:#E9ECF0;
+  --line:#D3D9E0;
+  --line-soft:#E4E8ED;
+  --ink:#151A21;
+  --ink-2:#3F4956;
+  --ink-3:#69747F;
+  --accent:#0B6E78;
+  --accent-2:#0E8A93;
+  --accent-wash:#DDEEF0;
+  --good:#2A6E52;
+  --good-wash:#DCEDE4;
+  --warn:#8A5A12;
+  --warn-wash:#F4E8D4;
+  --crit:#9E3826;
+  --crit-wash:#F5DFDA;
+  --shadow:0 1px 2px rgba(21,26,33,.05),0 8px 24px -12px rgba(21,26,33,.18);
+  --r:10px;
+  --maxw:1240px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#101418;
+    --surface:#171C22;
+    --surface-2:#1F252C;
+    --line:#2C343D;
+    --line-soft:#242B33;
+    --ink:#E5EAEF;
+    --ink-2:#B2BCC6;
+    --ink-3:#7E8A96;
+    --accent:#3FB2BC;
+    --accent-2:#57C6CF;
+    --accent-wash:#12333733;
+    --good:#69C79B;
+    --good-wash:#16342633;
+    --warn:#D9A85C;
+    --warn-wash:#3A2C1433;
+    --crit:#E58974;
+    --crit-wash:#3A1E1733;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101418;
+  --surface:#171C22;
+  --surface-2:#1F252C;
+  --line:#2C343D;
+  --line-soft:#242B33;
+  --ink:#E5EAEF;
+  --ink-2:#B2BCC6;
+  --ink-3:#7E8A96;
+  --accent:#3FB2BC;
+  --accent-2:#57C6CF;
+  --accent-wash:#12333733;
+  --good:#69C79B;
+  --good-wash:#16342633;
+  --warn:#D9A85C;
+  --warn-wash:#3A2C1433;
+  --crit:#E58974;
+  --crit-wash:#3A1E1733;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:Archivo,"IBM Plex Sans",sans-serif;text-wrap:balance;margin:0}
+h1{font-weight:700;font-size:clamp(30px,4.4vw,46px);letter-spacing:-.026em;line-height:1.08}
+h2{font-weight:600;font-size:clamp(20px,2.4vw,26px);letter-spacing:-.018em;line-height:1.2}
+h3{font-weight:600;font-size:16px;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+a:hover{border-bottom-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--accent);
+}
+
+/* ---------- masthead ---------- */
+header.top{
+  border-bottom:1px solid var(--line);
+  background:var(--surface);
+}
+.top .wrap{padding-top:44px;padding-bottom:38px;display:flex;flex-direction:column;gap:18px}
+.lede{font-size:17px;line-height:1.62;color:var(--ink-2);max-width:66ch}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.04em;
+  padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink-3);
+  background:var(--ground);
+}
+
+/* ---------- sticky nav ---------- */
+nav.jump{
+  position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb,var(--surface) 92%,transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+nav.jump .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:0;padding-bottom:0}
+nav.jump a{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-3);border-bottom:2px solid transparent;padding:13px 12px;white-space:nowrap;
+}
+nav.jump a:hover{color:var(--ink);border-bottom-color:var(--line)}
+
+section{padding:52px 0}
+section + section{border-top:1px solid var(--line-soft)}
+.sec-head{display:flex;flex-direction:column;gap:10px;margin-bottom:26px;max-width:74ch}
+.sec-head p{color:var(--ink-2)}
+
+/* ---------- cards ---------- */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:22px;box-shadow:var(--shadow);
+}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card h3{margin-bottom:8px}
+.card p{color:var(--ink-2);font-size:14.5px}
+.kicker{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;display:block;
+}
+
+/* ---------- tables ---------- */
+.scroller{
+  overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--surface);box-shadow:var(--shadow);
+}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+thead th{
+  position:sticky;top:0;background:var(--surface-2);z-index:2;
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);
+  border-bottom:1px solid var(--line);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--surface-2)}
+.num{font-variant-numeric:tabular-nums}
+
+/* matrix specifics */
+#matrix table{font-size:13px}
+#matrix th.stage{text-align:center;min-width:64px}
+#matrix td.cell{text-align:center;padding:8px 4px}
+#matrix td.layer-name{min-width:230px}
+#matrix td.layer-name strong{display:block;font-weight:600;font-size:13.5px;color:var(--ink)}
+#matrix td.layer-name span{display:block;color:var(--ink-3);font-size:12px;line-height:1.45;margin-top:2px}
+#matrix td.residual{min-width:230px;color:var(--ink-2);font-size:12.5px;line-height:1.5}
+.ln{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);
+  width:34px;text-align:right;padding-right:4px;
+}
+.dot{
+  display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;
+  font-size:11px;font-family:"IBM Plex Mono",monospace;font-weight:600;
+}
+.dot.p{background:var(--accent);color:var(--surface)}
+:root[data-theme="dark"] .dot.p,
+:root:not([data-theme="light"]) .dot.p{color:#0B1013}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .dot.p{color:#0B1013}}
+.dot.s{background:var(--accent-wash);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.dot.v{border:1px dashed var(--line);color:var(--ink-3)}
+
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:12.5px;color:var(--ink-2)}
+.legend div{display:flex;align-items:center;gap:7px}
+
+/* ---------- controls ---------- */
+.controls{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;
+}
+.controls input[type=search]{
+  font-family:"IBM Plex Sans",sans-serif;font-size:13.5px;
+  padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+  background:var(--surface);color:var(--ink);min-width:220px;flex:1 1 220px;max-width:320px;
+}
+.controls select{
+  font-family:"IBM Plex Sans",sans-serif;font-size:13.5px;
+  padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+  background:var(--surface);color:var(--ink);
+}
+.count{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);margin-left:auto}
+
+/* ---------- tags & pills ---------- */
+.tag{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;
+  letter-spacing:.03em;padding:2px 6px;border-radius:4px;margin:1px 3px 1px 0;
+  background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line-soft);
+  white-space:nowrap;
+}
+.pill{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px;white-space:nowrap;
+}
+.pill.free{background:var(--good-wash);color:var(--good);border:1px solid color-mix(in srgb,var(--good) 30%,transparent)}
+.pill.perdev{background:var(--accent-wash);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.pill.freemium{background:var(--warn-wash);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.pill.ent{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.flag{
+  display:inline-block;font-size:11.5px;color:var(--crit);margin-top:4px;line-height:1.45;
+}
+.flag.warnf{color:var(--warn)}
+.tname{font-weight:600;font-size:14px;display:block}
+.tvendor{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+td.price{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);min-width:150px}
+td.tools-layers{min-width:200px;max-width:290px}
+td.tname-cell{min-width:190px}
+td.note{min-width:250px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+
+/* ---------- ecosystems ---------- */
+.tier{display:flex;flex-direction:column;gap:14px;margin-bottom:24px}
+.tierrow{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);display:grid;grid-template-columns:120px 1fr;overflow:hidden}
+.tierlab{background:var(--surface-2);border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:3px}
+.tierlab .tn{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.tierlab .tv{font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:15px;
+  letter-spacing:-.01em;line-height:1.2}
+.tierbody{padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.tierbody p{font-size:13.5px;color:var(--ink-2);line-height:1.6}
+.tierbody .members{display:flex;flex-wrap:wrap;gap:5px}
+#eco-table td.econame{min-width:150px}
+#eco-table td.econame strong{display:block;font-size:13.5px}
+#eco-table td.ctrlc{min-width:230px;font-size:12.5px}
+#eco-table td.econote{min-width:300px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+#eco-table td.xc{text-align:center;padding:8px 4px}
+#eco-table th.xh{text-align:center;min-width:76px}
+.xm{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:6px;
+  font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;font-weight:600;text-align:center}
+.xm.y{background:var(--crit-wash);color:var(--crit);border:1px solid color-mix(in srgb,var(--crit) 34%,transparent)}
+.xm.n{background:var(--good-wash);color:var(--good);border:1px solid color-mix(in srgb,var(--good) 34%,transparent)}
+.xm.na{background:transparent;color:var(--ink-3);border:1px dashed var(--line);font-size:9px}
+@media (max-width:640px){.tierrow{grid-template-columns:1fr}.tierlab{border-right:none;border-bottom:1px solid var(--line)}}
+
+/* ---------- glossary ---------- */
+.gloss{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.gterm{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:15px 17px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.gterm h3{font-size:14.5px;letter-spacing:-.005em}
+.gterm p{font-size:13px;color:var(--ink-2);line-height:1.55}
+.gcat{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:9.5px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--accent)}
+
+/* ---------- coverage ---------- */
+.cov{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:6px;
+  font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;font-weight:600;text-align:center}
+.cov.f{background:var(--good-wash);color:var(--good);border:1px solid color-mix(in srgb,var(--good) 34%,transparent)}
+.cov.p{background:var(--warn-wash);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent)}
+.cov.n{background:transparent;color:var(--ink-3);border:1px dashed var(--line)}
+#cov-table th.pcol{text-align:center;min-width:58px}
+#cov-table td.pcell{text-align:center;padding:8px 4px}
+#cov-table td.dec{min-width:210px;font-size:12.5px;color:var(--ink)}
+#cov-table td.whyc{min-width:290px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+#cov-table td.kcell{min-width:130px}
+#cov-table td.kcell strong{display:block;font-size:13.5px}
+#cov-table td.kcell span{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:var(--ink-3)}
+.pathkey{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:20px}
+.pathkey .pk{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow)}
+.pathkey .pid{font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:15px;letter-spacing:-.01em}
+.pathkey .pscore{font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:24px;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1;margin:6px 0 0}
+.pathkey .pcost{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:var(--ink-3)}
+.pathkey .pkit{font-size:12px;color:var(--ink-2);line-height:1.5;margin-top:8px}
+
+.form-list{display:flex;flex-direction:column;gap:12px}
+.form-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);display:grid;grid-template-columns:52px 1fr;overflow:hidden}
+.form-num{background:var(--accent);color:var(--surface);display:flex;align-items:center;justify-content:center;
+  font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:19px;font-variant-numeric:tabular-nums}
+:root[data-theme="dark"] .form-num{color:#0B1013}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .form-num{color:#0B1013}}
+.form-body{padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.form-body h3{font-size:16px}
+.form-body p{font-size:13.5px;color:var(--ink-2);line-height:1.6}
+.form-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:6px;border-top:1px solid var(--line-soft)}
+.form-meta .mlbl{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-right:2px}
+@media (max-width:640px){.form-item{grid-template-columns:1fr}.form-num{padding:6px}}
+
+/* ---------- incidents ---------- */
+.statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow)}
+.stat .figure{font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:26px;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1;margin-bottom:1px}
+.stat .lbl{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);line-height:1.4}
+.stat.prev .figure{color:var(--good)}
+.stat.cont .figure{color:var(--warn)}
+.stat.det .figure{color:var(--crit)}
+
+.inc-list{display:flex;flex-direction:column;gap:14px}
+.inc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:88px 1fr;}
+.inc-year{
+  background:var(--surface-2);border-right:1px solid var(--line);
+  padding:18px 12px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;
+}
+.inc-year .mo{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.inc-year .yr{font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:19px;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.inc-body{padding:18px 20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.inc-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.inc-head h3{font-size:17px}
+.inc-head .sub{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-size:11.5px;color:var(--ink-3)}
+.inc-body p{font-size:14px;line-height:1.6;color:var(--ink-2)}
+.inc-body p.why{color:var(--ink-2)}
+.inc-note{border-left:2px solid var(--accent);padding-left:14px;margin-top:2px}
+.inc-note p{font-size:13.5px;color:var(--ink)}
+.inc-note .nlbl{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:4px}
+.inc-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:4px;border-top:1px solid var(--line-soft)}
+.inc-meta .mlbl{font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-right:2px}
+.vp{display:inline-block;font-family:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.vp.prevented{background:var(--good-wash);color:var(--good);border:1px solid color-mix(in srgb,var(--good) 32%,transparent)}
+.vp.contained{background:var(--warn-wash);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 32%,transparent)}
+.vp.detected{background:var(--crit-wash);color:var(--crit);border:1px solid color-mix(in srgb,var(--crit) 32%,transparent)}
+@media (max-width:640px){
+  .inc{grid-template-columns:1fr}
+  .inc-year{flex-direction:row;align-items:center;gap:10px;border-right:none;border-bottom:1px solid var(--line);padding:10px 16px}
+}
+
+/* ---------- callout ---------- */
+.callout{
+  border-left:3px solid var(--accent);background:var(--surface);
+  border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  border-radius:0 var(--r) var(--r) 0;padding:18px 20px;
+}
+.callout.crit{border-left-color:var(--crit)}
+.callout.warn{border-left-color:var(--warn)}
+.callout h3{margin-bottom:6px}
+.callout p{color:var(--ink-2);font-size:14.5px}
+.stack{display:flex;flex-direction:column;gap:14px}
+
+/* ---------- cost model ---------- */
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.cost-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.cost-card .figure{
+  font-family:Archivo,sans-serif;font-weight:700;font-size:30px;letter-spacing:-.02em;
+  color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1;margin:6px 0 2px;
+}
+.cost-card .unit{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3)}
+.cost-card ul{margin:12px 0 0;padding-left:16px;color:var(--ink-2);font-size:13px;line-height:1.7}
+
+ul.clean{margin:0;padding-left:18px;color:var(--ink-2);font-size:14.5px;line-height:1.7}
+ul.clean li+li{margin-top:5px}
+ul.clean strong{color:var(--ink)}
+
+footer{border-top:1px solid var(--line);background:var(--surface);margin-top:0}
+footer .wrap{padding:30px 24px 44px;color:var(--ink-3);font-size:12.5px;display:flex;flex-direction:column;gap:8px}
+footer a{color:var(--ink-2)}
+
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  section{padding:38px 0}
+  .top .wrap{padding-top:32px;padding-bottom:28px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <span class="eyebrow">Layered defense reference &middot; August 2026</span>
+    <h1>Pipeline Defense Matrix</h1>
+    <p class="lede">Twenty-one security layers mapped to where they sit in a CI/CD pipeline, cross-referenced against 133 tools with enterprise and zero-cost paths for each, and tested against fourteen well-documented incidents from Equifax to the npm worms of 2026. Built on the premise that no single control stops everything &mdash; so the question is what each layer catches, what it misses, and what the next one has to cover. Includes a cross-language map of where each ecosystem executes dependency code, and a glossary.</p>
+    <div class="meta-row">
+      <span class="chip">CIS Supply Chain Guide v1.0</span>
+      <span class="chip">OWASP CI/CD Top 10</span>
+      <span class="chip">SLSA v1.2</span>
+      <span class="chip">NIST SSDF 1.1</span>
+      <span class="chip">EU CRA 2024/2847</span>
+    </div>
+  </div>
+</header>
+
+<nav class="jump">
+  <div class="wrap">
+    <a href="#matrix">The Matrix</a>
+    <a href="#tools">Tool Cross-Ref</a>
+    <a href="#incidents">Case Studies</a>
+    <a href="#cost">Cost Model</a>
+    <a href="#coverage">Path Coverage</a>
+    <a href="#ecosystems">Ecosystems</a>
+    <a href="#stacks">Reference Stacks</a>
+    <a href="#traps">Traps</a>
+    <a href="#evaluation">Evaluation</a>
+    <a href="#compliance">Compliance Clock</a>
+    <a href="#glossary">Glossary</a>
+  </div>
+</nav>
+
+<section id="matrix">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 01</span>
+      <h2>Layers by pipeline stage</h2>
+      <p>Rows are control layers, anchored to the CIS Software Supply Chain Security Guide's five categories and the OWASP CI/CD Top 10 rather than invented. Columns are pipeline stages. The residual column is the part that matters most: what this layer structurally cannot catch, and therefore what you are relying on a later layer to cover.</p>
+    </div>
+    <div class="scroller"><table id="matrix-table"><thead></thead><tbody></tbody></table></div>
+    <div class="legend">
+      <div><span class="dot p">&#9679;</span> Primary gate &mdash; blocks here</div>
+      <div><span class="dot s">&#9678;</span> Supporting control</div>
+      <div><span class="dot v">&#9675;</span> Verify / monitor only</div>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 02</span>
+      <h2>Tool cross-reference</h2>
+      <p>One hundred and thirty-three tools against the twenty-one layers, scored for what they cost to run on a <em>private</em> codebase rather than for open-source generosity. Ownership and pricing verified against vendor sources in August 2026 &mdash; this market consolidates fast enough that a matrix more than a year old will contain dead entries. Filter by layer to see who actually competes for a given control.</p>
+    </div>
+    <div class="callout" style="margin-bottom:20px">
+      <h3>A free license and a free deployment are not the same thing</h3>
+      <p>The distinction matters most exactly where a commercial team works. <strong>Self-hosted open-source tools</strong> &mdash; Trivy, Semgrep CE, Gitleaks, zizmor, osv-scanner, Syft, cosign, Dependency-Track, Checkov &mdash; run against a private repository at no cost, because you host them. <strong>Hosted free tiers usually do not.</strong> CodeQL, runner egress monitoring, GitHub secret scanning, and most behavioral package scanners are free on public repositories and billed on private ones.</p>
+      <p style="margin-top:10px">The badge on each row reflects that, not open-source status. <span class="pill free">Free on private repos</span> means you can point it at a commercial codebase for nothing. <span class="pill freemium">Free for OSS only</span> means the free tier stops at public repositories &mdash; still worth knowing, because a public-repo trial is often the fastest route to a proof of concept and a purchase approval, but not something to plan a private pipeline around.</p>
+    </div>
+
+    <div class="controls">
+      <input type="search" id="tsearch" placeholder="Search tool or vendor&hellip;" aria-label="Search tools">
+      <select id="tlayer" aria-label="Filter by layer"><option value="">All layers</option></select>
+      <select id="tcost" aria-label="Filter by cost model">
+        <option value="">All cost models</option>
+        <option value="free">Free / open source</option>
+        <option value="freemium">Freemium &mdash; caveats</option>
+        <option value="perdev">Per-developer SaaS</option>
+        <option value="ent">Enterprise quote</option>
+      </select>
+      <select id="tstatus" aria-label="Filter by availability">
+        <option value="">All availability</option>
+        <option value="privfree">Free on private repos</option>
+        <option value="privpaid">Paid for private repos</option>
+        <option value="ossonly">Free for open source only</option>
+        <option value="dead">Dead or deprecated</option>
+        <option value="caution">Licensing caution</option>
+      </select>
+      <span class="count" id="tcount"></span>
+    </div>
+    <div class="scroller"><table id="tools-table"><thead></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<section id="incidents">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 03</span>
+      <h2>Fourteen incidents, and which layer would have caught them</h2>
+      <p>A layer taxonomy is only worth as much as its contact with real failures. Each case below is mapped to the layers that apply and given an honest verdict &mdash; including the ones where the answer is that almost nothing in this matrix would have helped. A section claiming every breach was preventable would be marketing.</p>
+    </div>
+
+    <div class="statbar">
+      <div class="stat prev"><div class="figure">10</div><div class="lbl">Preventable<br>by a matrix control</div></div>
+      <div class="stat cont"><div class="figure">3</div><div class="lbl">Contained only<br>blast radius reduced</div></div>
+      <div class="stat det"><div class="figure">1</div><div class="lbl">Detected only<br>after the fact</div></div>
+      <div class="stat det"><div class="figure">3</div><div class="lbl">Shipped validly<br>signed or attested</div></div>
+      <div class="stat"><div class="figure">3</div><div class="lbl">Caused by<br>mutable references</div></div>
+      <div class="stat"><div class="figure">2</div><div class="lbl">Found by accident<br>not by any control</div></div>
+    </div>
+
+    <div class="controls">
+      <select id="ivf" aria-label="Filter case studies by verdict">
+        <option value="">All verdicts</option>
+        <option value="prevented">Preventable</option>
+        <option value="contained">Contained only</option>
+        <option value="detected">Detected only</option>
+      </select>
+      <select id="ilf" aria-label="Filter case studies by layer"><option value="">All layers</option></select>
+      <span class="count" id="icount"></span>
+    </div>
+
+    <div class="inc-list" id="inc-list"></div>
+
+    <div style="margin-top:20px" class="callout">
+      <h3>A rule worth extracting: build inputs versus test data</h3>
+      <p>A common and sound policy is to keep binaries out of source repositories, storing them in an artifact repository where they are scanned on the way in. That policy would not have caught xz, and the reason generalizes usefully.</p>
+      <p style="margin-top:10px">The fixtures were encrypted &mdash; a substitution cipher and compression for the first stage, an RC4-style decryptor implemented in awk for the second. There was no package name, no version, and no coordinates to match against an advisory, so a CVE-based scanner had nothing to work with regardless of feed freshness. A behavioral scanner fares no better: high-entropy compressed binary data in a compression library&rsquo;s test corpus is indistinguishable from legitimate test data, and entropy heuristics would flag every file in that directory equally.</p>
+      <p style="margin-top:10px">What the policy actually buys is <strong>governance rather than detection</strong>, and that is still worth having. A binary in an artifact repository is a declared, named, versioned object with an uploader identity and a timestamp, and adding one is a reviewable change. A file committed under a test directory renders as &ldquo;Binary files differ&rdquo; and gets skimmed past.</p>
+      <p style="margin-top:10px">The sharper rule this case argues for: <strong>anything in the repository that the build path reads is a build input and needs source-grade scrutiny, whatever its file type.</strong> Test fixtures the test suite reads are one risk class. Test fixtures the <em>build</em> reads &mdash; which is exactly what the trojaned macro did at configure time &mdash; are another entirely, and almost nobody draws that line. The general version is that generated files shipped inside release artifacts are a review-free zone by convention: autotools tarballs carry configure, Makefile.in and bundled m4, none of it reviewed and none of it in version control. The same shape appears in minified JavaScript bundles, vendored dependency trees, generated protobuf code, and lockfiles nobody diffs against their manifest.</p>
+    </div>
+
+    <div style="margin-top:20px" class="callout crit">
+      <h3>Three patterns that cut across all twelve</h3>
+      <p><strong>Signing attests to identity, never to correctness.</strong> Three of these &mdash; SolarWinds, Ultralytics, and CHAINDROP &mdash; produced artifacts that were validly signed or attested by the legitimate publisher and were malicious anyway, because the compromise sat upstream of the signing step. CHAINDROP is the starkest: it compromised maintainer GitHub accounts, so the legitimate release workflow ran and npm published packages carrying valid provenance, and the worm minted fresh attestations using OIDC tokens scraped out of runner memory. Provenance was worse than useless there &mdash; it supplied a false legitimacy signal that defeated tooling keyed on &ldquo;is this package signed?&rdquo; Any matrix scoring artifact signing as a mitigation has to say <em>where</em> in the pipeline the compromise occurred.</p>
+      <p style="margin-top:10px"><strong>Mutable references caused three of them.</strong> xz shipped a tarball that differed from git; tj-actions had its version tags retargeted; Ledger reached users through a floating CDN version. Immutability of what you consume &mdash; commit-SHA pins, hash-locked manifests, subresource integrity &mdash; is the highest-leverage single control across the whole set.</p>
+      <p style="margin-top:10px"><strong>Detection barely functioned.</strong> SolarWinds was found through an MFA enrollment anomaly at one customer. xz was found by a database engineer investigating unexplained SSH latency. Codecov was found by one customer who checked a published hash after nine weeks. Only tj-actions was caught by a control built for the purpose, and that control was runner egress monitoring &mdash; not any scanner.</p>
+    </div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 04</span>
+      <h2>What it costs to cover sixteen layers</h2>
+      <p>Modelled on a 100-developer software vendor. Per-developer pricing is the only transparent segment of this market; every enterprise suite is quote-only, so those figures are ranges from published tiers and reported deal sizes, not list prices. Treat them as sizing, not quotes.</p>
+    </div>
+    <div class="cost-grid">
+      <div class="cost-card">
+        <span class="kicker">Path A &middot; Zero cost</span>
+        <div class="figure">$0</div>
+        <div class="unit">per year &middot; 100 devs</div>
+        <ul>
+          <li>Every layer has at least one free, permissively licensed, actively maintained option</li>
+          <li>Real cost is engineering time: roughly 0.5&ndash;1 FTE to integrate, tune, and keep current</li>
+          <li>Gaps: no vendor SLA, no unified findings view, self-hosted infrastructure for Dependency-Track</li>
+          <li>Public-repo-only free tiers do not carry over: CodeQL, runner egress monitoring, and GitHub secret scanning all become paid line items on a private codebase</li><li>What does hold on private repos: Trivy, Semgrep CE, Gitleaks, osv-scanner, Syft, Dependency-Track, zizmor, pinact, Checkov, cosign, Renovate, Dependabot</li>
+        </ul>
+      </div>
+      <div class="cost-card">
+        <span class="kicker">Path B &middot; Platform-native</span>
+        <div class="figure">$59k&ndash;$120k</div>
+        <div class="unit">per year &middot; 100 devs</div>
+        <ul>
+          <li>GitHub Code Security $30/committer/mo + Secret Protection $19/committer/mo &asymp; $59k/yr</li>
+          <li>Or GitLab Ultimate (quote-only since the $99 list price was withdrawn)</li>
+          <li>Covers SAST, SCA, secrets, SBOM &mdash; leaves DAST, container, IaC, malicious-package, and pipeline security uncovered</li>
+          <li>Backfill the gaps with free tools rather than a second commercial platform</li>
+        </ul>
+      </div>
+      <div class="cost-card">
+        <span class="kicker">Path C &middot; Developer-first stack</span>
+        <div class="figure">$90k&ndash;$180k</div>
+        <div class="unit">per year &middot; 100 devs</div>
+        <ul>
+          <li>Snyk or Semgrep ($25&ndash;$30/dev/mo) + Socket ($25&ndash;$50/dev/mo) + StepSecurity ($16/dev/mo)</li>
+          <li>Transparent pricing, fast onboarding, strong developer adoption</li>
+          <li>Add Aikido at ~$7.2k/yr if you want one vendor covering the widest layer spread</li>
+          <li>Still needs a registry gateway for the intake-quarantine layer, and CI-native OIDC for secrets rather than a paid manager</li>
+        </ul>
+      </div>
+      <div class="cost-card">
+        <span class="kicker">Path D &middot; Enterprise suite</span>
+        <div class="figure">$250k&ndash;$600k+</div>
+        <div class="unit">per year &middot; 100 devs</div>
+        <ul>
+          <li>Checkmarx / Veracode / Black Duck plus JFrog or Sonatype for the registry gateway</li>
+          <li>JFrog self-managed Enterprise X starts ~$51k/yr &mdash; Curation, Advanced Security and Runtime are paid add-ons at <em>every</em> tier</li>
+          <li>Sonatype Repository Firewall from ~$4.8k/yr; Lifecycle quote-only</li>
+          <li>Add a hardened base image catalog on top &mdash; free from Docker or Minimus, or roughly $19k&ndash;$75k/yr for Chainguard or RapidFort</li><li>Buys procurement defensibility, audit support, and one throat to choke &mdash; not better detection</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:18px" class="callout">
+      <h3>The honest read on spend</h3>
+      <p>Layer coverage does not scale with price. The free stack and the $500k stack detect broadly similar things; what money buys is consolidation, support, compliance reporting, and someone to escalate to. Three layers are the exception, where paid tools measurably outperform free ones: <strong>registry gating with quarantine</strong>, <strong>behavioral malicious-package analysis</strong>, and <strong>base image hardening</strong>. The first two depend on threat databases that are expensive to build and keep current, and no free tool matches them for breadth. The third is simply labour &mdash; somebody has to rebuild thousands of images every time an upstream package changes. If the budget only stretches to part of this matrix, those three are where it earns the most.</p>
+    </div>
+  </div>
+</section>
+
+<section id="coverage">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 05</span>
+      <h2>What each path would actually have caught</h2>
+      <p>The four spending paths scored against all fourteen incidents. The result is not the one a procurement process usually expects, so the caveat underneath the table matters as much as the table.</p>
+    </div>
+
+    <div class="pathkey" id="pathkey"></div>
+
+    <div class="scroller"><table id="cov-table"><thead></thead><tbody></tbody></table></div>
+    <div class="legend">
+      <div><span class="cov f">&#9679;</span> Prevented by a control in this path</div>
+      <div><span class="cov p">&#9678;</span> Detected or blast radius reduced</div>
+      <div><span class="cov n">&mdash;</span> Not covered</div>
+    </div>
+
+    <div style="margin-top:22px" class="callout crit">
+      <h3>Read this table correctly &mdash; it is not an argument against buying tools</h3>
+      <p>Path A scores highest because the decisive control in most of these incidents was <em>architectural rather than purchased</em>: pin by digest, hold no standing credentials, wait before adopting a new version, build from source control. Those cost nothing to license. What the table measures is <strong>available capability, not achieved capability</strong> &mdash; every Path A control is free to adopt and expensive to operate consistently across many teams, with no vendor to escalate to and no report to hand an auditor. One further correction for a commercial codebase: Path A&rsquo;s <em>prevention</em> holds on private repositories, because pinning, cooldowns, disabled install scripts, and building from source control are self-hosted or procedural. Its <em>detection</em> degrades, because runner egress monitoring and the deepest free SAST engine are free only on public repositories. Assume the free path costs something once the repositories are private.</p>
+      <p style="margin-top:10px">The genuinely surprising column is <strong>D</strong>. The enterprise suites miss the entire CI/CD pipeline security cluster, because none of the large AppSec platforms analyze workflow definitions or monitor runners. The two most recent pipeline compromises on this list &mdash; a poisoned build cache and retargeted version tags &mdash; are invisible to a quarter-million-dollar platform and are caught by tools that cost nothing. If you buy Path D, budget separately for that gap.</p>
+    </div>
+
+    <div class="sec-head" style="margin-top:44px">
+      <h2>The closest thing to a formula</h2>
+      <p>There is no magic formula, and anyone selling one is selling something. But these seven properties, taken together, cover all fourteen incidents &mdash; and every one of them is free to license. They are not a tool list; they are properties your pipeline either has or does not.</p>
+    </div>
+
+    <div class="form-list" id="form-list"></div>
+
+    <div style="margin-top:20px" class="callout">
+      <h3>So what does the money actually buy?</h3>
+      <p>Not incident coverage &mdash; the table above is clear about that. What a budget buys is the difference between a control existing and a control being <em>enforced</em>, which is the real problem at organizational scale.</p>
+      <p style="margin-top:10px"><strong>Enforcement across teams.</strong> You can set a cooldown in one repository&rsquo;s Renovate config for free. Enforcing a quarantine policy across four hundred repositories, with exceptions tracked and audited, is what a registry gateway is for.</p>
+      <p style="margin-top:10px"><strong>Breadth in the two layers where free tools are genuinely thinner.</strong> Behavioral malicious-package detection and continuously rebuilt hardened base images both depend on work somebody has to do every day, and the free options are narrower rather than equivalent.</p>
+      <p style="margin-top:10px"><strong>Private-repository coverage.</strong> Several of the strongest free controls &mdash; runner egress monitoring, the deepest SAST engine &mdash; are free only on public repositories. For a commercial vendor, that half of Path A is not actually free.</p>
+      <p style="margin-top:10px"><strong>Evidence.</strong> Findings correlation at volume, and the audit trail a CRA technical file or a customer security questionnaire demands. A free stack can be more secure and still fail a procurement review, because nothing produces the report.</p>
+      <p style="margin-top:10px">The honest sequencing, then: implement the seven properties first, because they are free and they cover the incidents. Buy tools second, to enforce and evidence what you have already implemented. Doing it in the other order is how organizations end up with a large licensing spend and unpinned workflow actions.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ecosystems">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 06</span>
+      <h2>Where each ecosystem executes dependency code</h2>
+      <p>The formula&rsquo;s fourth property &mdash; disable lifecycle scripts &mdash; reads as npm advice, but it generalizes across every language, and the generalization is cleaner than the per-ecosystem mechanics. One question sorts them all: <strong>does acquiring or building a dependency execute dependency-authored code before you run your own program?</strong></p>
+    </div>
+
+    <div class="tier">
+      <div class="tierrow">
+        <div class="tierlab"><span class="tn">Tier 1</span><span class="tv">Executes on acquisition</span></div>
+        <div class="tierbody">
+          <p>Merely resolving a dependency is enough to be compromised. This is where every worm campaign in Section 03 lives, and also where the tooling is now strongest &mdash; all of these have an allowlist or a refusal flag.</p>
+          <div class="members"><span class="tag">npm / pnpm / yarn / bun</span><span class="tag">pip &amp; uv (source distributions)</span><span class="tag">RubyGems</span><span class="tag">Conan</span><span class="tag">vcpkg</span><span class="tag">Composer (plugins)</span></div>
+        </div>
+      </div>
+      <div class="tierrow">
+        <div class="tierlab"><span class="tn">Tier 2</span><span class="tv">Executes on build</span></div>
+        <div class="tierbody">
+          <p>Nothing runs at resolution; plenty runs at compile. Almost none of these can be turned off, which is why the official answer from every one of these vendors is some version of &ldquo;isolate the build.&rdquo; This tier is the reason build environment integrity exists as its own layer in the matrix.</p>
+          <div class="members"><span class="tag">Maven</span><span class="tag">Gradle</span><span class="tag">NuGet</span><span class="tag">Cargo</span></div>
+        </div>
+      </div>
+      <div class="tierrow">
+        <div class="tierlab"><span class="tn">Tier 3</span><span class="tv">Executes only when you run it</span></div>
+        <div class="tierbody">
+          <p>Acquisition and compilation are both inert. Exactly one ecosystem qualifies, and it is a design decision rather than an accident.</p>
+          <div class="members"><span class="tag">Go</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroller"><table id="eco-table"><thead></thead><tbody></tbody></table></div>
+    <div class="legend">
+      <div><span class="xm y">&#9679;</span> Dependency-authored code executes</div>
+      <div><span class="xm n">&mdash;</span> Does not execute</div>
+      <div><span class="xm na">n/a</span> No separate phase</div>
+    </div>
+
+    <div style="margin-top:22px" class="callout">
+      <h3>The rule that falls out of the table</h3>
+      <p><strong>Where you can turn execution off, allowlist it. Where you cannot, isolate the build.</strong> Six of the eleven have no official disable at all &mdash; Maven, Gradle, Conan, vcpkg, RubyGems and Cargo &mdash; and their vendors say so plainly. Apache&rsquo;s own security page: &ldquo;the Maven security model assumes you trust the pom.xml&hellip; it is up to you to provide the required isolation.&rdquo; Microsoft on MSBuild: &ldquo;unknown build logic should be assumed to be capable of executing arbitrary code in the build environment.&rdquo; Gradle: build scripts &ldquo;can also execute arbitrary code during the configuration phase.&rdquo; RubyGems: &ldquo;installing a gem runs someone else&rsquo;s code on your machine, with your privileges.&rdquo; These first-party admissions are better evidence than any third-party analysis.</p>
+      <p style="margin-top:10px">Three findings worth carrying into an architecture review. <strong>Java&rsquo;s attack surface is plugins, not dependencies</strong> &mdash; archives are inert at resolution, while plugins, build extensions and <code>.mvn/extensions.xml</code> load third-party code before any build logic runs, and most SCA tooling scans the dependency block and ignores the plugin block entirely. <strong>.NET has no install scripts but does have build execution</strong> &mdash; the PowerShell hooks were legacy, but packages still inject MSBuild targets that run during build, and analyzers load directly into the compiler process. <strong>Composer has the strongest allowlist in the industry</strong>, default-deny and fail-closed since December 2021, roughly four and a half years ahead of npm.</p>
+      <p style="margin-top:10px">One correction worth making explicitly, because the documentation invites the error: in Cargo, <code>package.build = false</code> disables the build script <em>only for the package that declares it</em>. A consumer cannot set it for a dependency. There is no consumer-side flag, on stable or nightly, and the sandboxing effort did not continue past 2024.</p>
+    </div>
+
+    <div style="margin-top:16px" class="callout">
+      <h3>Prior art, so you need not invent the taxonomy</h3>
+      <p>Ladisa, Plate, Martinez and Barais, <em>&ldquo;SoK: Taxonomy of Attacks on Open-Source Software Supply Chains,&rdquo;</em> IEEE Security &amp; Privacy 2023, is the best citation &mdash; it frames this exact axis and names &ldquo;prevent script execution&rdquo; and &ldquo;isolation of build steps&rdquo; as distinct safeguards. Duan et al., NDSS 2021, includes a per-registry comparison with an explicit install-hook row, though only for three interpreted-language registries. Ohm et al., DIMVA 2020, maps trigger points against a dataset of real malicious packages.</p>
+      <p style="margin-top:10px">Worth knowing what does <em>not</em> cover this axis, since both get cited as though they do: the OpenSSF S2C2F framework and the OpenSSF and CISA &ldquo;Principles for Package Repository Security&rdquo; contain no requirement addressing install-time or build-time code execution. S2C2F is oriented to post-acquisition scanning, inventory and updating; the Principles are organized around authentication and authorization.</p>
+    </div>
+  </div>
+</section>
+
+<section id="stacks">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 07</span>
+      <h2>Two reference stacks</h2>
+      <p>Concrete builds rather than a shopping list. Both assume GitHub Actions; both apply the same principle &mdash; spend on the layers where free tools are genuinely weaker, use free tools everywhere else.</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <span class="kicker">Solo maintainer &middot; open source &middot; $0</span>
+        <h3>Hardened OSS release pipeline</h3>
+        <ul class="clean" style="margin-top:10px">
+          <li><strong>Source</strong> &mdash; FIDO2 hardware key, signed commits, branch protection applied to yourself, OpenSSF Scorecard</li>
+          <li><strong>Pipeline</strong> &mdash; zizmor + actionlint in PR, all actions pinned to commit SHA via pinact, Harden-Runner Community (free, unlimited public repos)</li>
+          <li><strong>Deps</strong> &mdash; vendored in-tree, hermetic build with network disabled, cargo-deny or a go.mod diff gate blocking new deps</li>
+          <li><strong>Scanning</strong> &mdash; govulncheck or cargo-audit in PR, osv-scanner nightly against the committed SBOM</li>
+          <li><strong>Malware</strong> &mdash; Socket free-for-OSS tier plus GuardDog</li>
+          <li><strong>Publish</strong> &mdash; cosign keyless via OIDC, GitHub artifact attestations for SLSA Build L2&ndash;L3, Syft SBOM attached to the release</li>
+          <li><strong>Fuzzing</strong> &mdash; native Go fuzzing, or ClusterFuzzLite if OSS-Fuzz eligibility is not met</li>
+          <li><strong>Credentials</strong> &mdash; zero standing PATs, OIDC only, ephemeral signing identity per run</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="kicker">Enterprise vendor &middot; 100 devs &middot; ~$140k/yr</span>
+        <h3>Commercial SaaS release pipeline</h3>
+        <ul class="clean" style="margin-top:10px">
+          <li><strong>Gateway</strong> &mdash; Sonatype Repository Firewall or JFrog Curation with a quarantine-new-releases policy, not just a CVE gate</li>
+          <li><strong>Source &amp; secrets</strong> &mdash; GitHub Secret Protection with push protection, GitGuardian if you need NHI governance</li>
+          <li><strong>SAST</strong> &mdash; Semgrep or GitHub Code Security; Opengrep if the Semgrep rule license is a problem</li>
+          <li><strong>Behavioral</strong> &mdash; Socket or Endor Labs for malicious-package detection with reachability</li>
+          <li><strong>Pipeline</strong> &mdash; StepSecurity Enterprise for runner egress control and Actions policy</li>
+          <li><strong>Artifacts</strong> &mdash; cosign or JFrog Evidence, SLSA Build L3 provenance, SBOM into technical documentation for CRA</li>
+          <li><strong>Deploy</strong> &mdash; Kyverno or Sigstore policy-controller so only verified images admit; Trivy or Aqua for image scanning</li>
+          <li><strong>Correlation</strong> &mdash; DefectDojo free, or an ASPM vendor once finding volume outgrows it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="traps">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 08</span>
+      <h2>Traps in the tool list</h2>
+      <p>Things that break a matrix assembled from search results or last year's notes. Each of these was verified this month.</p>
+    </div>
+    <div class="stack">
+      <div class="callout crit">
+        <h3>Brakeman is non-commercial-use only</h3>
+        <p>The license grants use "only for the purpose of non-Commercial Use." Commercial use requires a purchased license. This is the single most common trap in a "free Rails security stack" &mdash; it is not free for a software vendor.</p>
+      </div>
+      <div class="callout crit">
+        <h3>Five entries are dead or deprecated</h3>
+        <p><strong>Terrascan</strong> archived November 2025. <strong>tfsec</strong> merged into Trivy. <strong>chain-bench</strong> unreleased since January 2024. <strong>git-secrets</strong> has zero published releases and 93 open issues. <strong>Phylum</strong> no longer exists independently &mdash; its technology was acquired by Veracode in January 2025.</p>
+      </div>
+      <div class="callout warn">
+        <h3>Free tiers that are not free enough to matter</h3>
+        <p><strong>Docker Scout</strong> free tier covers one repository. <strong>Safety CLI</strong>'s free plan is explicitly "not recommended for commercial purposes" and ships a degraded database. <strong>Chainguard</strong>'s free tier is 5 images via Catalog Starter, or 43 images at <code>:latest</code> only &mdash; no version pinning. <strong>gitleaks-action</strong> requires a free license key for organization accounts and has been proprietary since v2.0.0; invoke the MIT CLI in a <code>run:</code> step instead.</p>
+      </div>
+      <div class="callout warn">
+        <h3>Copyleft in the toolchain</h3>
+        <p>Renovate self-hosted, StepSecurity secure-repo, and TruffleHog are AGPL-3.0. hadolint is GPL-3.0. Semgrep CE, Opengrep, and njsscan are LGPL. All fine invoked as CI binaries; all matter if you fork them, vendor them, or offer them as a service. AFL++ is AGPL with an explicit carve-out &mdash; the fuzzing harness itself stays Apache-2.0.</p>
+      </div>
+      <div class="callout crit">
+        <h3>Your scanner is also a supply chain</h3>
+        <p>In March 2026 an attacker force-pushed malicious commits over all 77 <code>trivy-action</code> tags and all 7 <code>setup-trivy</code> tags, plus Trivy binaries v0.69.4&ndash;v0.69.6 and Docker Hub images. The payload scraped runner process memory and 50+ filesystem paths for SSH keys, cloud credentials, and Kubernetes tokens. Safe versions: Trivy v0.69.3 or earlier, <code>trivy-action</code> v0.35.0, <code>setup-trivy</code> v0.2.6. This is the strongest available argument for pinning actions to commit SHAs rather than tags.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="evaluation">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 09</span>
+      <h2>Evaluating the behavioral layer</h2>
+      <p>Malicious-package and behavioral analysis is the newest layer in this matrix and the one buyers have least practice assessing. Two questions decide most evaluations, and neither is answerable from a datasheet. Worked through below against a widely deployed tool in the category, since the answers generalize to its competitors.</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <span class="kicker">Depth &middot; by ecosystem</span>
+        <h3>How deep does the analysis go on compiled languages?</h3>
+        <p style="margin-bottom:10px">The framing usually needs adjusting first. Of the ecosystems that feel &ldquo;compiled,&rdquo; only <strong>JVM and .NET actually ship binaries</strong>. Go modules, Rust crates, and Swift packages all distribute source, so static analysis applies as directly as it does to npm.</p>
+        <p style="margin-bottom:10px">For Maven, Socket states it analyzes &ldquo;every file in the package, including the compiled binary JAR, the source code JAR, and any accompanying metadata,&rdquo; and its NuGet threat research demonstrably produces findings on compiled DLLs including IL metadata. Whether the automated pipeline decompiles bytecode or analyzes it directly is <strong>not published</strong>.</p>
+        <p>What is documented is that coverage is measurably shallower there. Obfuscated-code detection is marked unsupported for Maven, NuGet, Go, and Crates. The maintainer-takeover signal is npm and Packagist only. Swift, C/C++, Julia, Dart, and Elixir are CVE-only despite carrying a GA label. Ask any vendor in this category for its per-ecosystem alert matrix, not its ecosystem list.</p>
+      </div>
+      <div class="card">
+        <span class="kicker">Scale &middot; build time</span>
+        <h3>Will it slow a build with thousands of dependencies?</h3>
+        <p style="margin-bottom:10px">Largely no, and the architecture is why. Socket states it &ldquo;preemptively scans every open-source package, so by the time a customer triggers a scan, Socket has already analyzed nearly every package in their dependency tree.&rdquo; Analysis happens <strong>once per package-version, centrally</strong>, and is shared across all customers. A build-time scan is dependency-tree resolution plus a database lookup, not code analysis &mdash; which is why large trees do not scale linearly.</p>
+        <p style="margin-bottom:10px">Pull-request scans diff against the last head scan by default. The default CLI mode is asynchronous; a report flag makes it blocking.</p>
+        <p>The exception is full application reachability analysis, which runs in your own runner. Its published defaults set the envelope: a 10-minute timeout and an 8GB memory limit per run. That is a real runner-sizing requirement. Lower reachability tiers are precomputed server-side and add no build time. The general lesson: ask which analysis happens on the vendor's infrastructure and which happens on yours.</p>
+      </div>
+    </div>
+    <div style="margin-top:16px" class="callout warn">
+      <h3>Two caveats to carry into any evaluation of this layer</h3>
+      <p>No vendor in this category publishes scan-latency benchmarks, so build-time impact has to be measured during a trial rather than negotiated from a datasheet. And central pre-computation has a specific failure mode: independent testing has found declared dependencies silently absent from reports, traced to package indexing gaps. If a package-version is not in the index it is not analyzed, and the absence is quiet rather than loud &mdash; so a proof of concept should verify that every declared dependency actually appears, not merely that findings look plausible. Tools in this layer also position themselves as complementary to CVE-based SCA rather than replacing it; they alert on supply chain attacks, malware, and typosquats rather than on every known vulnerability.</p>
+    </div>
+  </div>
+</section>
+
+<section id="compliance">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 10</span>
+      <h2>The compliance clock</h2>
+      <p>The regulatory picture moved in opposite directions across the Atlantic this year. For a commercial software vendor, plan for EU obligations tightening and US federal obligations fragmenting.</p>
+    </div>
+    <div class="grid3">
+      <div class="card">
+        <span class="kicker">EU &middot; 11 September 2026</span>
+        <h3>CRA reporting goes live</h3>
+        <p>Article 14 reporting obligations become applicable. Actively exploited vulnerabilities and severe incidents must be reported to your member state CSIRT: <strong>24 hours</strong> early warning, <strong>72 hours</strong> full notification, <strong>14 days</strong> final report. The 24-hour clock is what breaks existing processes &mdash; it needs a path from discovery to filing that does not route through multi-day legal review.</p>
+      </div>
+      <div class="card">
+        <span class="kicker">EU &middot; 11 December 2027</span>
+        <h3>Full CRA obligations</h3>
+        <p>Essential cybersecurity requirements, vulnerability handling, conformity assessment, CE marking. SBOM in a machine-readable format covering <strong>at least top-level dependencies</strong>, held in technical documentation and produced to market surveillance authorities on request &mdash; not published. Germany's BSI TR-03183 v2.1.0 is the most concrete preview, naming CycloneDX 1.6 and SPDX 3.0.1 with per-component SHA-256 hashes.</p>
+      </div>
+      <div class="card">
+        <span class="kicker">US &middot; 23 January 2026</span>
+        <h3>OMB M-26-05 relaxed the mandate</h3>
+        <p>Rescinded the mandatory software attestation requirements of M-22-18 and M-23-16. There is no longer a government-wide SSDF self-attestation on the CISA Common Form, and SBOM submission is no longer universally mandated. <strong>Do not remove these controls.</strong> Agencies now set risk-based requirements individually, which may fragment one form into many; the CRA mandates SBOM regardless; and enterprise customers increasingly require attestations contractually.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="glossary">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 11</span>
+      <h2>Glossary</h2>
+      <p>Every acronym and term of art used in this document, defined in the sense it carries here rather than in the abstract. Several entries flag a distinction that is routinely collapsed &mdash; identity versus correctness, detection versus management, available versus achieved.</p>
+    </div>
+    <div class="controls">
+      <input type="search" id="gsearch" placeholder="Search terms&hellip;" aria-label="Search glossary">
+      <select id="gcat" aria-label="Filter glossary by category">
+        <option value="">All categories</option>
+        <option value="attack">Attack techniques</option>
+        <option value="control">Controls &amp; practices</option>
+        <option value="tools">Tool categories</option>
+        <option value="standards">Standards &amp; frameworks</option>
+        <option value="identity">Identity &amp; credentials</option>
+        <option value="data">Vulnerability data</option>
+        <option value="build">Build &amp; packaging</option>
+      </select>
+      <span class="count" id="gcount"></span>
+    </div>
+    <div class="gloss" id="gloss-list"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong style="color:var(--ink-2)">Sources.</strong> Framework definitions from <a href="https://slsa.dev/spec/v1.2/">SLSA v1.2</a>, <a href="https://csrc.nist.gov/projects/ssdf">NIST SSDF SP 800-218</a>, <a href="https://owasp.org/www-project-top-10-ci-cd-security-risks/">OWASP Top 10 CI/CD Security Risks</a>, <a href="https://www.cisecurity.org/insights/white-papers/cis-software-supply-chain-security-guide">CIS Software Supply Chain Security Guide</a>, and <a href="https://digital-strategy.ec.europa.eu/en/policies/cra-reporting">EU CRA reporting guidance</a>. Pricing read from vendor pricing pages in August 2026. Socket detail from <a href="https://docs.socket.dev/docs/language-support">Socket documentation</a> and threat research. Trivy compromise detail from <a href="https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23">GHSA-69fq-xp46-6x23</a>.</p>
+    <p>Quote-only pricing is modelled from published tiers and reported deal sizes, not vendor quotes. Verify before budgeting.</p>
+    <p style="margin-top:12px;color:var(--ink-2)">&copy; 2026 Larry Grill. All rights reserved. An independent reference compiled by Larry Grill (<a href="https://www.linkedin.com/in/larrygrill">linkedin.com/in/larrygrill</a>) &mdash; shared for professional evaluation. Not derived from, or affiliated with, any employer's proprietary materials.</p>
+  </div>
+</footer>
+
+<script>
+const STAGES = [
+  ["precommit","Pre-commit"],["pr","PR"],["build","Build"],["merge","Merge"],
+  ["publish","Publish"],["testsec","Test / Sec"],["preprod","Pre-prod"],["prod","Prod"]
+];
+
+const LAYERS = [
+  {id:"src",n:1,short:"Source",name:"Source &amp; identity control",what:"Branch protection, signed commits, hardware-key MFA, CODEOWNERS, least-privilege collaborators",
+   ref:"CIS 1 &middot; CICD-SEC-1,2 &middot; SLSA Source L1-L4",
+   s:{precommit:"p",pr:"p",build:null,merge:"p",publish:"s",testsec:null,preprod:null,prod:null},
+   res:"Cannot detect a legitimate maintainer whose own credentials or workstation are compromised. Projects with a single maintainer concentrate rather than remove this risk."},
+
+  {id:"secmgmt",n:2,short:"Secrets mgmt",name:"Secrets management",what:"Credential issuance and storage, short-lived OIDC tokens over static credentials, scoping and rotation",
+   ref:"CIS 1,2 &middot; CICD-SEC-6 &middot; SSDF PO.5",
+   s:{precommit:null,pr:"s",build:"p",merge:null,publish:"p",testsec:"s",preprod:"s",prod:"p"},
+   res:"Solves credential issuance, not credential leakage &mdash; a secret correctly vaulted can still be printed into a build log. It pairs with detection rather than replacing it. Distinct control from the row below, though OWASP files both under CICD-SEC-6."},
+
+  {id:"secdet",n:3,short:"Secrets detect",name:"Secrets detection",what:"Pre-commit scanning, push protection, historical repo scanning, live credential verification",
+   ref:"CIS 1 &middot; CICD-SEC-6 &middot; SSDF PS.1",
+   s:{precommit:"p",pr:"p",build:"s",merge:"s",publish:"s",testsec:"v",preprod:"v",prod:"v"},
+   res:"Pattern-based, so it always lags novel credential formats. The durable control is architectural: short-lived credentials mean a harvested secret is worthless before it can be used."},
+
+  {id:"sast",n:4,short:"SAST",name:"Static analysis of first-party code",what:"SAST, taint analysis, secure-coding lint against code written in-house",
+   ref:"CIS 1 &middot; SSDF PW.7 &middot; DSOMM Static Depth",
+   s:{precommit:"s",pr:"p",build:"s",merge:"s",publish:null,testsec:null,preprod:null,prod:null},
+   res:"Says nothing about dependencies, which are the majority of shipped code. High false-positive rates erode the gate unless reachability-filtered."},
+
+  {id:"gate",n:5,short:"Registry gate",name:"Dependency intake &amp; registry gating",what:"Proxy or firewall in front of upstream registries, curation policy, quarantine of new releases, hash-pinned lockfiles, vendoring",
+   ref:"CIS 3 &middot; CICD-SEC-3 &middot; SCVS V4",
+   s:{precommit:null,pr:"p",build:"p",merge:"s",publish:null,testsec:null,preprod:null,prod:null},
+   res:"A CVE-based gate cannot stop malicious-on-publish packages, because no advisory exists during propagation. A quarantine or minimum-release-age policy is the control that covers this &mdash; not the CVE feed."},
+
+  {id:"sca",n:6,short:"SCA",name:"Known-vulnerability scanning",what:"SCA against CVE and advisory databases, ideally reachability-filtered",
+   ref:"CIS 3 &middot; SSDF PW.4, RV.1 &middot; SCVS V5",
+   s:{precommit:null,pr:"p",build:"p",merge:"s",publish:"s",testsec:"s",preprod:"v",prod:"v"},
+   res:"Structurally a lagging indicator. Also a point-in-time check: vendored or frozen dependencies go stale silently, so it must run on a schedule against the SBOM, not only at the release gate."},
+
+  {id:"mal",n:7,short:"Malicious pkg",name:"Malicious package &amp; behavioral analysis",what:"Capability and permission-creep detection, install-script and obfuscation flags, maintainer anomaly signals, typosquat detection",
+   ref:"CIS 3 &middot; CICD-SEC-3 &middot; SLSA Dependency (draft)",
+   s:{precommit:null,pr:"p",build:"p",merge:"s",publish:null,testsec:null,preprod:null,prod:null},
+   res:"Tuned to each ecosystem's known execution paths. Recent worm campaigns evaded this class by planting execution in editor and agent configuration files that dependency scanners were not configured to read."},
+
+  {id:"remed",n:8,short:"Remediation",name:"Remediation &amp; patch lifecycle",what:"Automated dependency upgrades, AI-assisted fix generation, backported patches applied at the pinned version",
+   ref:"SSDF RV.2 &middot; DSOMM Patch Management",
+   s:{precommit:null,pr:"p",build:"s",merge:"s",publish:null,testsec:"s",preprod:null,prod:null},
+   res:"Fixes only what a scanner already found, inheriting every blind spot of the tool feeding it. Backported patches also diverge from upstream &mdash; you own that fork until the version you are pinned to catches up."},
+
+  {id:"bld",n:9,short:"Build integrity",name:"Build environment integrity",what:"Ephemeral single-use runners, hermetic builds with network disabled, pinned toolchain, isolation from signing material",
+   ref:"CIS 2 &middot; CICD-SEC-5,7 &middot; SLSA Build L2-L3",
+   s:{precommit:null,pr:null,build:"p",merge:null,publish:"s",testsec:null,preprod:null,prod:null},
+   res:"Does not validate what goes into the build &mdash; a faithfully reproducible build of compromised source produces a compromised artifact, signed and attested. The blind spot most often missed is that <em>any file the build path reads is a build input regardless of its type</em>, so binary test fixtures and generated files shipped in release tarballs need source-grade review they almost never get."},
+
+  {id:"pipe",n:10,short:"Pipeline",name:"CI/CD workflow &amp; runner security",what:"Actions pinned to commit SHA, workflow static analysis, runner egress control, poisoned-pipeline-execution defenses, org action allowlists",
+   ref:"CIS 2 &middot; CICD-SEC-4,5,7,8",
+   s:{precommit:null,pr:"p",build:"p",merge:"s",publish:"p",testsec:null,preprod:null,prod:null},
+   res:"The most commonly omitted layer, and the one a registry proxy does not help with &mdash; a CI action is code executing beside the signing identity, not an artifact flowing through curation. Mutable version tags here are dynamic resolution by another name."},
+
+  {id:"sign",n:11,short:"Signing",name:"Artifact signing &amp; provenance",what:"Keyless signing via OIDC, SLSA provenance attestation, transparency log entry, reproducible builds",
+   ref:"CIS 2,4 &middot; CICD-SEC-9 &middot; SLSA Build L1-L3 &middot; SSDF PS.2",
+   s:{precommit:null,pr:null,build:"s",merge:null,publish:"p",testsec:"v",preprod:"v",prod:"v"},
+   res:"Proves where an artifact came from, not that its inputs were sound. A package published with legitimate but stolen maintainer credentials produces provenance that validates cleanly."},
+
+  {id:"sbom",n:12,short:"SBOM",name:"SBOM &amp; continuous monitoring",what:"Generation at build, signing, retention, scheduled rescan of shipped inventory against new advisories",
+   ref:"CIS 2 &middot; SSDF PS.3.2 &middot; SCVS V2 &middot; CRA Annex I Pt II",
+   s:{precommit:null,pr:null,build:"p",merge:null,publish:"p",testsec:"s",preprod:"s",prod:"p"},
+   res:"An SBOM generated and filed is inventory, not detection. Without a scheduled rescan it records what shipped, never that what shipped became vulnerable afterwards."},
+
+  {id:"cont",n:13,short:"Container scan",name:"Container &amp; image scanning",what:"Image vulnerability scanning, Dockerfile lint, registry scanning, digest pinning",
+   ref:"CIS 4 &middot; SSDF PW.6",
+   s:{precommit:null,pr:"s",build:"p",merge:null,publish:"p",testsec:"p",preprod:"s",prod:"v"},
+   res:"Scanning finds CVEs in an image; it does not reduce them. Detection volume is a function of base image choice, which is the row below."},
+
+  {id:"base",n:14,short:"Base images",name:"Base image hardening &amp; CVE elimination",what:"Minimal or distroless catalogs built from source, runtime-profiled image minimization, backported OS patches",
+   ref:"CIS 4 &middot; SSDF PW.6 &middot; SLSA Build L3",
+   s:{precommit:null,pr:null,build:"p",merge:null,publish:"p",testsec:"s",preprod:"s",prod:"v"},
+   res:"Eliminates CVEs in the base, not in first-party code or direct dependencies. Catalog vendors only help where an equivalent image exists, so bespoke, legacy, and commercial third-party images need a transformer approach instead."},
+
+  {id:"iac",n:15,short:"IaC",name:"IaC &amp; deployment config",what:"Terraform, Kubernetes, Helm, CloudFormation and pipeline-definition misconfiguration scanning",
+   ref:"CIS 5 &middot; CICD-SEC-7 &middot; SSDF PW.9",
+   s:{precommit:"s",pr:"p",build:"s",merge:"s",publish:null,testsec:"p",preprod:"p",prod:"v"},
+   res:"Policy-based and therefore only as good as the ruleset. Drift after deployment is invisible to it, which needs posture monitoring at runtime."},
+
+  {id:"dast",n:16,short:"DAST / fuzz",name:"Dynamic testing &amp; fuzzing",what:"DAST and API scanning against a running instance; coverage-guided fuzzing of untrusted-input parsers",
+   ref:"SSDF PW.8 &middot; DSOMM Dynamic Depth",
+   s:{precommit:null,pr:"v",build:"s",merge:null,publish:null,testsec:"p",preprod:"p",prod:"v"},
+   res:"DAST needs a running surface, so it contributes almost nothing to a CLI or a library. For those, fuzzing is the high-value analog and finds real defects that DAST structurally cannot."},
+
+  {id:"run",n:17,short:"Runtime",name:"Runtime &amp; admission control",what:"Signature verification at admission, runtime detection and blocking, workload isolation, egress policy, drift detection",
+   ref:"CIS 5 &middot; CICD-SEC-1 &middot; SSDF PS.4 (draft)",
+   s:{precommit:null,pr:null,build:null,merge:null,publish:null,testsec:"s",preprod:"p",prod:"p"},
+   res:"The last enforcement point, and the one that closes the loop on signing &mdash; an attestation nobody verifies at deploy is decoration. Cannot undo a compromise already shipped to customers."},
+
+  {id:"nhi",n:18,short:"NHI",name:"Non-human identity governance",what:"Discovery, ownership, lifecycle, and risk scoring of service accounts, tokens, OAuth grants, and agent identities",
+   ref:"CICD-SEC-2,6 &middot; SSDF PO.5",
+   s:{precommit:null,pr:null,build:"s",merge:null,publish:"s",testsec:"v",preprod:"v",prod:"p"},
+   res:"Inventories and governs machine identities but does not authenticate them. An over-scoped identity that is fully catalogued is still over-scoped, and the governance layer is only as current as its discovery sweep."},
+
+  {id:"ai",n:19,short:"AI supply chain",name:"AI, model &amp; agent supply chain",what:"Model file scanning, AI-BOM, MCP server and agent tooling review, repository-supplied agent configuration treated as executable",
+   ref:"SSDF SP 800-218A &middot; CICD-SEC-3,8",
+   s:{precommit:"s",pr:"p",build:"s",merge:"s",publish:"s",testsec:"s",preprod:null,prod:"s"},
+   res:"The newest and least mature layer. Model formats, agent frameworks, and MCP servers change faster than scanners track them, and repository-supplied agent configuration is executable content that most tooling still treats as inert data."},
+
+  {id:"aspm",n:20,short:"ASPM",name:"Findings correlation",what:"Deduplication across scanners, risk-based prioritization, ownership routing, SLA tracking",
+   ref:"DSOMM Consolidation &middot; SSDF RV.2",
+   s:{precommit:null,pr:"s",build:"s",merge:"s",publish:"s",testsec:"s",preprod:"s",prod:"s"},
+   res:"Adds no detection whatsoever. Its value lies entirely in whether findings get acted on, which is real, but it is a throughput layer rather than a security layer."},
+
+  {id:"log",n:21,short:"Logging",name:"Audit logging &amp; detection",what:"SCM, CI, and registry audit logs; alerting on anomalous publish, permission, and workflow events",
+   ref:"CICD-SEC-10 &middot; SSDF PO.5",
+   s:{precommit:"v",pr:"v",build:"v",merge:"v",publish:"p",testsec:"v",preprod:"v",prod:"p"},
+   res:"Detects nothing on its own and prevents nothing. It is what makes an incident reconstructable &mdash; the layer that matters only after every other layer has failed."}
+];
+
+const C = {free:"Free / OSS", freemium:"Freemium", perdev:"Per-dev SaaS", ent:"Enterprise"};
+
+const TOOLS = [
+  // ===== Enterprise suites =====
+  {n:"Checkmarx One",v:"Checkmarx (H&F)",l:["sast","sca","secdet","iac","cont","dast","mal","aspm"],c:"ent",p:"Quote only",note:"Acquired Tromzo Dec 2025 for agentic remediation."},
+  {n:"Veracode",v:"Veracode (TA Associates)",l:["sast","dast","sca","mal","gate","cont","iac","aspm"],c:"ent",p:"Quote only",note:"Acquired Phylum technology Jan 2025, adding genuine malicious-package detection and a package firewall &mdash; the biggest capability jump in its SCA line."},
+  {n:"Black Duck",v:"Black Duck (Clearlake/FP)",l:["sast","sca","dast","iac","secdet","cont","aspm"],c:"ent",p:"Quote; Polaris consumption-based",note:"Spun out of Synopsys Oct 2024. Coverity, Seeker, Defensics, Software Risk Manager. Broad, but a portfolio rather than one engine."},
+  {n:"HCL AppScan",v:"HCLSoftware",l:["sast","dast","sca"],c:"ent",p:"Quote / scan packs",note:"AppScan 360&deg; adds self-hosted cloud-native deployment."},
+  {n:"Mend.io",v:"Mend (independent)",l:["sca","sast","secdet","cont","gate","remed"],c:"ent",p:"Quote only",note:"Formerly WhiteSource. Owns Renovate, which is a real remediation advantage. Mend AI covers LLM governance."},
+
+  // ===== Registry gateways =====
+  {n:"JFrog Xray + Curation",v:"JFrog (NASDAQ: FROG)",l:["gate","sca","secdet","iac","cont","mal","sign","run"],c:"ent",p:"Self-managed Ent X from ~$51k/yr",flag:"Only baseline SCA is bundled. Curation, Advanced Security, and Runtime are separately paid, and Advanced Security additionally requires an Enterprise X or Enterprise+ license &mdash; it cannot be bought onto a lower tier. Note also that JFrog&rsquo;s IaC coverage is Terraform-centric (modules, plan files, state files) plus container misconfiguration, rather than the Kubernetes, Helm, CloudFormation and Bicep breadth of a dedicated IaC scanner.",fw:1,note:"Artifactory plus Evidence for provenance. The proxy is the highest-leverage control point in most pipelines. Frogbot (below) is the free pull-request front end that extends this from registry-side scanning to a merge gate. Advanced Security SAST, contextual analysis and secrets detection cover Go, Java, Kotlin, JavaScript, TypeScript, C#/.NET, Python, C/C++ and Rust &mdash; broader language coverage than most matrices credit it with."},
+  {n:"JFrog Frogbot",v:"JFrog &mdash; Apache-2.0",l:["sca","remed","gate","sast","secdet","iac"],c:"freemium",p:"Bot is free and open source; requires a JFrog platform instance with Xray",
+   note:"The pull-request front end to the JFrog stack, and the piece that turns Xray from a registry-side scanner into a merge gate. Two modes: scan a pull request before merge and comment on it, or scan the repository on a schedule and open fix pull requests. Supports GitHub, GitLab, Bitbucket, Azure DevOps, and Jenkins. Two capabilities are easy to miss because they are Frogbot-side rather than Xray-side: snippet detection, which points at the offending line rather than just naming the component, and dynamic token validation, which tests a discovered secret against its provider to see whether it is actually live &mdash; the same trick that makes TruffleHog&rsquo;s false-positive rate so low.",
+   flag:"Three tier boundaries worth separating rather than treating as one. First, the bot is Apache-2.0 but useless without a JFrog platform instance. Second, only SCA and license checks run on a base Xray subscription &mdash; SAST, secrets detection, IaC, and contextual CVE analysis are all Advanced Security. Third, and most consequential for budgeting: Advanced Security requires an Enterprise X or Enterprise+ license, so it is not an add-on a Pro customer can simply purchase. Maintainers have also flagged that the repository-scan command probes an Advanced Security endpoint and fails without it.",fw:1},
+
+  {n:"Sonatype Repository Firewall",v:"Sonatype (Vista)",l:["gate","sca","mal","sbom"],c:"ent",p:"Firewall Pro from ~$4.8k/yr; Lifecycle quote",note:"Best-in-class at quarantining newly published and suspicious components &mdash; the control that actually covers malicious-on-publish. Nexus Repository Community is free."},
+  {n:"Cloudsmith",v:"Cloudsmith",l:["gate","sign","sbom"],c:"ent",p:"Tiered SaaS",note:"The main cloud-native alternative to JFrog and Sonatype for artifact management with supply chain policy."},
+
+  // ===== Platform native =====
+  {n:"GitHub Code Security",v:"GitHub / Microsoft",l:["sast","sca","sbom","remed"],c:"perdev",p:"$30 / active committer / mo",note:"CodeQL, Copilot Autofix, Dependabot, dependency review. Split from GHAS Apr 2025 and now buyable standalone by Team customers. No DAST, container, or IaC."},
+  {n:"GitHub Secret Protection",v:"GitHub / Microsoft",l:["secdet"],c:"perdev",p:"$19 / active committer / mo",note:"Secret scanning, push protection, validity checks. Free on public repositories."},
+  {n:"GitLab Ultimate",v:"GitLab",l:["sast","sca","secdet","cont","iac","dast","aspm"],c:"ent",p:"Quote only &mdash; $99 list price withdrawn",note:"Broadest native single-vendor coverage for teams already on GitLab."},
+  {n:"SonarQube Cloud / Server",v:"Sonar",l:["sast","secdet","iac","sca"],c:"ent",p:"By lines of code",note:"Renamed Oct 2024. Added SCA via the Tidelift acquisition and SonarQube Advanced Security in 2025 &mdash; older matrices list it as SAST-only.",flag:"Community Build has no taint-analysis SAST and no advanced secrets detection. The security-relevant half is paid.",fw:1},
+  {n:"Harness STO",v:"Harness",l:["aspm","pipe"],c:"ent",p:"Quote",note:"Scanning orchestration bundled into the CI/CD platform. Relevant mainly when the pipeline tool decision is still open."},
+  {n:"Datadog Code Security",v:"Datadog",l:["sast","sca","run","log"],c:"ent",p:"Platform pricing",note:"Wins by default in Datadog-standardized shops thanks to the pipeline-to-production telemetry tie-in."},
+
+  // ===== Developer-first =====
+  {n:"Snyk",v:"Snyk",l:["sast","sca","cont","iac","aspm","remed"],c:"perdev",p:"Team from $25/dev/mo; Ignite $1,260/yr/dev",note:"Free tier caps at 5 projects. No true DAST.",flag:"Vendor risk: roughly 90 layoffs in 2026, dim IPO prospects, inconclusive PE talks. Weigh acquisition risk on multi-year commitments.",fw:1},
+  {n:"Semgrep",v:"Semgrep",l:["sast","sca","secdet","mal"],c:"perdev",p:"Teams $30/contributor/mo; Secrets $15",note:"Free tier: 10 contributors, 10 repos. Custom rule authoring is the differentiator.",flag:"Registry rules moved to a restrictive license in Dec 2024 &mdash; internal, non-competing, non-SaaS use only. Opengrep is the escape hatch.",fw:1},
+  {n:"Socket.dev",v:"Socket",l:["mal","sca","secdet","sbom","gate","ai"],c:"perdev",p:"Team $25/dev/mo (min 5); Business $50",oss:1,note:"Free for open source, with complimentary Team accounts on request. Capability and permission-creep detection is the core strength. Acquired Secure Annex Apr 2026, extending to browser, IDE, and AI-tool extensions."},
+  {n:"Aikido Security",v:"Aikido",l:["sca","sast","secdet","cont","iac","dast","mal","run","base","remed"],c:"perdev",p:"Basic $300/mo, Pro/Advanced $600/mo",note:"Widest layer coverage per dollar. Acquired Root.io Jun 2026, adding agentic backported patching and a 2,000+ pre-remediated hardened image catalog. Plan-based rather than purely per-dev."},
+  {n:"Endor Labs",v:"Endor Labs",l:["sca","mal","sast","secdet","sign","gate","sbom","cont","pipe","ai"],c:"perdev",p:"Seat-based; Core/Pro not published",note:"One of very few tools covering artifact signing natively. Package Firewall and backported Patches are unusual additions. Free Developer tier does local scanning only."},
+  {n:"Backslash Security",v:"Backslash",l:["sast","sca"],c:"ent",p:"Quote",note:"Reachability-focused code security with strong analyst traction."},
+  {n:"Jit",v:"Jit",l:["aspm","sast","sca","secdet","iac"],c:"freemium",p:"Free tier, then quote",note:"Developer-first orchestration of open-source scanners &mdash; a managed wrapper around the free stack."},
+
+  // ===== ASPM =====
+  {n:"Cycode",v:"Cycode",l:["aspm","secdet","sca","sast","iac","pipe","src"],c:"ent",p:"Quote",note:"Owns its scanners after acquiring Bearer in 2024. Covers SCM and CI posture, which most ASPM does not."},
+  {n:"Apiiro",v:"Apiiro",l:["aspm","sast","sca"],c:"ent",p:"Quote",note:"Deep ASPM with a design and code risk graph. Strongest at change-impact and design-time risk."},
+  {n:"Ox Security",v:"Ox Security",l:["aspm","pipe","sca","secdet"],c:"ent",p:"Quote",note:"Active ASPM with a pipeline BOM concept."},
+  {n:"Legit Security",v:"Legit Security",l:["aspm","pipe","secdet","src"],c:"ent",p:"Quote",note:"ASPM plus CI/CD pipeline and SDLC posture &mdash; one of the few that treats the pipeline itself as an asset."},
+  {n:"Arnica",v:"Arnica",l:["aspm","secdet","sca","sast","src"],c:"ent",p:"Quote",note:"Pipelineless and developer-native. IDC MarketScape Major Player for ASPM 2025."},
+  {n:"ArmorCode",v:"ArmorCode",l:["aspm"],c:"ent",p:"Quote",note:"Major aggregation-model ASPM &mdash; correlates third-party findings rather than bringing its own scanners, which changes whether ASPM is additive to or a replacement for scanning spend."},
+  {n:"DefectDojo",v:"OWASP / DefectDojo",l:["aspm"],c:"free",p:"Free, self-hosted OSS",oss:1,note:"The free answer to findings correlation. Ingests SARIF and dozens of scanner formats. Start here before buying ASPM."},
+
+  // ===== CNAPP =====
+  {n:"Wiz",v:"Google",l:["iac","secdet","sast","cont","run","aspm","nhi"],c:"ent",p:"Quote",note:"$32B acquisition closed Mar 2026, the largest VC-backed acquisition on record. Expect Google Cloud bundling pressure; multi-cloud roadmap not yet clarified."},
+  {n:"Orca Security",v:"Orca",l:["iac","secdet","cont","run"],c:"ent",p:"Quote",note:"Agentless CNAPP. Partnership with Aqua since Jun 2024 &mdash; explicitly a partnership, not a merger."},
+  {n:"Aqua Security",v:"Aqua",l:["cont","iac","run"],c:"ent",p:"Quote; Trivy free",note:"Maintains Trivy, the most-used open-source scanner in CI."},
+  {n:"Sysdig",v:"Sysdig",l:["cont","run","log"],c:"ent",p:"Quote",note:"Maintains Falco, the CNCF runtime standard. Strongest at runtime-informed prioritization &mdash; filtering findings to packages actually loaded."},
+  {n:"Cortex Cloud",v:"Palo Alto Networks",l:["iac","sca","secdet","cont","run","ai"],c:"ent",p:"Quote",note:"Prisma Cloud was rebranded into Cortex Cloud Feb 2025; a matrix still listing Prisma Cloud is stale. PANW also absorbed Protect AI (2025), CyberArk, and Chronosphere (Jan 2026)."},
+  {n:"Upwind",v:"Upwind",l:["run","cont","iac","sca","sbom","dast","log"],c:"ent",p:"Quote",note:"Runtime-first CNAPP built on eBPF, with the strongest shift-left story in the runtime group &mdash; IaC, SCA/SBOM, and admission control alongside detection. $250M Series B Jan 2026."},
+  {n:"Qualys / Tenable / Rapid7",v:"Three public vendors",l:["dast","cont"],c:"ent",p:"Quote",note:"AppSec bolted onto vulnerability-management platforms. Rarely the right pick for a developer-facing pipeline unless already standardized on them for infrastructure."},
+
+  // ===== Observability vendors with real security products =====
+  {n:"Dynatrace",v:"Dynatrace (NYSE: DT)",l:["run","sca","log"],c:"ent",p:"Runtime Vulnerability Analytics and Runtime Application Protection $13/mo per 8 GiB host; Security Posture Management $5/mo per host",note:"The strongest security offering among observability vendors. Reports a vulnerability only when the component is actively loaded, giving reachability-based prioritization through the APM agent already deployed, plus inline exploit blocking.",flag:"Runtime and pre-production only. Dynatrace documents this as complementing rather than replacing pipeline checks &mdash; do not score it as a build-step scanner.",fw:1},
+  {n:"Splunk AppDynamics",v:"Cisco",l:["run","log"],c:"ent",p:"Separately licensed Secure Application add-on",note:"The application-security product is AppDynamics Secure Application, not Splunk Observability Cloud. Runtime vulnerability assessment by scanning code execution in production, plus RASP-style attack blocking. Weak CI/CD relevance."},
+  {n:"New Relic",v:"New Relic (Francisco/TPG)",l:["run","aspm"],c:"ent",p:"Consumption-based; 100 GB/mo free, $0.40/GB after",note:"Security RX detects loaded libraries and correlates findings from other scanners.",flag:"Substantially an aggregation layer over other vendors' scanners plus runtime library detection. No RASP and no CI/CD-native scanning &mdash; materially thinner than Dynatrace.",fw:1},
+  {n:"Elastic Security",v:"Elastic (NYSE: ESTC)",l:["run","log"],c:"ent",p:"Essentials from $0.09/ingested GB; Complete from $0.11/GB",note:"SIEM, EDR, cloud posture, and cloud workload protection. No application-layer runtime vulnerability analytics or RASP, and essentially no CI/CD relevance &mdash; include it as a logging and detection backend, not an AppSec tool."},
+
+  // ===== Runtime ADR / eBPF reachability =====
+  {n:"Oligo Security",v:"Oligo",l:["run","sca","sbom","ai"],c:"ent",p:"Quote",note:"The definitional ADR vendor. Function-level execution evidence inside a running workload, claiming 90&ndash;99% noise reduction on vulnerability findings. $60M Series C Aug 2026."},
+  {n:"Sweet Security",v:"Sweet Security",l:["run","nhi","iac","dast"],c:"ent",p:"Quote",note:"Runtime CNAPP with a patented LLM-driven anomaly detection engine, plus identity threat detection. Production runtime only &mdash; no pipeline integration."},
+  {n:"Operant AI",v:"Operant AI",l:["ai","run"],c:"freemium",p:"Free tier; detailed pricing not published",note:"Runtime protection for AI agents and MCP servers rather than conventional workloads &mdash; agent gateways, tool-poisoning defense, and inline data redaction. Also ships Woodpecker, an open-source AI red-teaming tool."},
+  {n:"Contrast Security",v:"Contrast",l:["dast","run","sca","sast"],c:"ent",p:"Quote",note:"The clearest runtime-instrumentation play &mdash; IAST plus Application Detection and Response. Added CVE Shield Jul 2026."},
+
+  // ===== Base image hardening / CVE elimination =====
+  {n:"Chainguard",v:"Chainguard",l:["base","cont"],c:"ent",p:"Catalog priced by engineering org size, from ~$19k for a team of 10",note:"The incumbent the rest of this category prices against. Rebuilds everything from source on its own Wolfi distro and hands back a replacement image. Wolfi, apko, and melange are fully free and open source.",flag:"Free tier is 5 images via Catalog Starter, or 43 images at :latest only &mdash; no version pinning, no CVE SLA.",fw:1},
+  {n:"RapidFort",v:"RapidFort",l:["base","cont","sbom","run"],c:"ent",p:"AWS Marketplace list $75k/yr, unlimited containers; free tier of 5 curated images",note:"The transformer rather than a catalog: profiles running containers to produce a runtime bill of materials, then strips unused packages from your existing image using that evidence. Keeps your Alpine/Debian/UBI base rather than replacing it, so it works on bespoke, legacy, and commercial third-party images no catalog will ever contain. Also ships a 35,000+ image curated catalog. DoD hardening origins."},
+  {n:"Minimus",v:"Minimus",l:["base","cont","sbom"],c:"free",p:"Entire catalog free since Jun 2026, no login; Enterprise adds SLAs",oss:1,note:"Hardened images built minimal from source, often 95% smaller, with per-digest SBOM, VEX, and signatures. Enterprise SLAs are among the tightest published: KEV in 1 day, critical/high in 2. Comparison content claiming it has no free tier is stale."},
+  {n:"Docker Hardened Images",v:"Docker",l:["base","cont","sign","sbom"],c:"freemium",p:"Community free under Apache 2.0; Select from $5,000/repo",note:"Built on standard Alpine and Debian rather than a proprietary distro &mdash; a direct swipe at Chainguard's model. Signed SBOMs, SLSA Build L3 provenance, OpenVEX, and explicitly unsuppressed CVE data. Full catalog free for production use since Dec 2025."},
+  {n:"Seal Security",v:"Seal Security",l:["base","remed","sca"],c:"ent",p:"Quote; on AWS Marketplace",note:"Backported patches as the minimal diff needed to fix the CVE, applied at your current version. Covers OS packages and language ecosystems &mdash; Java, Python, JavaScript, C/C++, Go, PHP, C#, Ruby &mdash; which is broader than container-only peers. Ingests findings from existing scanners rather than replacing them. 72-hour SLA on critical and high."},
+  {n:"Edera",v:"Edera",l:["run"],c:"ent",p:"Quote",note:"Not an image-hardening tool despite frequent grouping with them. A container-native Type-1 hypervisor on Xen giving every pod hardware-enforced isolation in its own micro-VM. Addresses blast radius rather than vulnerability count &mdash; relevant for multi-tenant clusters and running untrusted or AI-generated code."},
+
+  // ===== Secrets management =====
+  {n:"CI-native OIDC (GitHub / GitLab)",v:"GitHub / GitLab",l:["secmgmt"],c:"free",p:"Free on all tiers",oss:1,note:"The zero-cost baseline every paid tool should be measured against. A per-job token is exchanged with AWS, Azure, GCP, Vault, JFrog, or PyPI for a credential scoped to that job's duration, so no standing secret exists to steal. GitLab removed CI_JOB_JWT in 17.0 &mdash; only id_tokens remains."},
+  {n:"IBM Vault (HashiCorp)",v:"IBM",l:["secmgmt","nhi"],c:"ent",p:"IBM HashiCorp Cloud Platform PAYG / Flex / self-managed",note:"Now on 2.x, with IBM as the named licensor. Native JWT/OIDC auth makes it a first-class target for CI federation.",flag:"Community Edition is BUSL 1.1, source-available rather than open source &mdash; the license bars offering Vault as a competing hosted service. HCP Vault Secrets reached end of life Jul 2026.",fw:1},
+  {n:"OpenBao",v:"Linux Foundation / OpenSSF",l:["secmgmt"],c:"free",p:"Free, MPL 2.0",oss:1,note:"The viable open-source fork of Vault, created by IBM engineers after the license change and now an OpenSSF sandbox project. Nvidia joined as an adopter May 2026, alongside SAP and Fermilab. Momentum is real but the ecosystem is materially smaller than Vault's, with adoption skewed toward EU digital-sovereignty buyers."},
+  {n:"Cloud-native secret stores",v:"AWS / GCP / Azure",l:["secmgmt"],c:"freemium",p:"AWS $0.40/secret/mo; GCP ~$0.06/version/mo with an always-free tier; Azure per 10k transactions",note:"The cheap default, and the usual target of CI OIDC federation. Combining a cloud secret store with CI-native OIDC covers this layer for close to nothing in most architectures."},
+  {n:"Doppler",v:"Doppler",l:["secmgmt"],c:"perdev",p:"Free for 3 users; Developer $8/user/mo; Team $21/user/mo",note:"Service Account Identities exchange a CI OIDC token for a short-lived API token.",flag:"OIDC-based issuance requires the Team plan or above &mdash; the free and Developer tiers do not cover the security-relevant capability.",fw:1},
+  {n:"Infisical",v:"Infisical",l:["secmgmt"],c:"perdev",p:"Free (5 identities); Pro $20/identity/mo; Advanced $40",oss:1,note:"Genuine open core &mdash; MIT for the core with enterprise features separately licensed, which is a real differentiator against Vault's BUSL. Native OIDC auth for GitHub Actions with a dedicated action. Billed per machine identity rather than per seat."},
+  {n:"Akeyless",v:"Akeyless",l:["secmgmt","nhi"],c:"freemium",p:"Free tier (5 clients, 500 static secrets); Enterprise custom",note:"Distributed Fragments Cryptography with hybrid gateways for zero-knowledge operation. Billed by clients rather than by secret, which changes TCO modelling.",flag:"SAML and OIDC are Enterprise-only. The free tier includes cloud-workload and Kubernetes auth but not OIDC federation.",fw:1},
+  {n:"1Password Secrets Automation",v:"1Password",l:["secmgmt"],c:"perdev",p:"Included with a 1Password Business subscription",note:"Service Accounts or self-hosted Connect servers, with SDKs and CLI. Unusually cheap for teams already buying 1Password.",flag:"Documented auth is token-based service accounts. OIDC short-lived credential issuance is not documented &mdash; verify before relying on it.",fw:1},
+  {n:"CyberArk Conjur",v:"Palo Alto Networks (Idira)",l:["secmgmt","nhi"],c:"ent",p:"Quote",note:"CyberArk was acquired by Palo Alto Networks and the platform rebranded Idira in May 2026.",flag:"The Idira launch does not mention Conjur or the PAM line by name. Conjur OSS last released Nov 2025 and is visibly slowing; roadmap uncertain post-rebrand.",fw:1},
+
+  // ===== Non-human identity governance =====
+  {n:"Astrix / Entro / Oasis",v:"Three NHI vendors",l:["nhi","secmgmt"],c:"ent",p:"Quote",note:"Discovery, ownership, lifecycle, and risk scoring for service accounts, API tokens, and OAuth grants &mdash; the inventory problem that secrets management does not solve. A fast-consolidating category driven by agentic identity growth."},
+  {n:"Token Security / Aembit",v:"Two NHI vendors",l:["nhi","secmgmt"],c:"ent",p:"Quote",note:"Aembit focuses on workload-to-workload access brokering with short-lived credentials, which overlaps the OIDC pattern; Token Security focuses on machine identity posture and lifecycle."},
+  {n:"GitGuardian",v:"GitGuardian",l:["secdet","nhi"],c:"freemium",p:"Free up to 25 devs; Growth/Enterprise quote",note:"Secrets detection plus non-human identity governance, honeytokens, and public monitoring for leaked internal credentials."},
+
+  // ===== AI / model / agent supply chain =====
+  {n:"Protect AI",v:"Palo Alto Networks",l:["ai"],c:"ent",p:"Quote",note:"Model file scanning for unsafe deserialization, AI-BOM, and model provenance. Acquired by PANW Jul 2025 and folded into the Cortex line &mdash; no longer a standalone purchase."},
+  {n:"HiddenLayer",v:"HiddenLayer",l:["ai"],c:"ent",p:"Quote",note:"Model scanning and adversarial ML detection. One of the few remaining independent MLSecOps vendors after the 2025 consolidation wave."},
+  {n:"Lakera",v:"Lakera",l:["ai"],c:"freemium",p:"Free tier; Enterprise quote",note:"Prompt injection and LLM application guardrails, aimed at runtime rather than build."},
+  {n:"Cisco MCP Scanner",v:"Cisco",l:["ai","pipe"],c:"free",p:"Free, open source",oss:1,note:"Scans MCP servers for tool poisoning and unsafe capability declarations. Among the first open-source tools in a category that barely existed a year ago and is becoming table stakes fast."},
+
+  // ===== Binary composition analysis =====
+  {n:"Binarly / NetRise / Finite State",v:"Three BCA vendors",l:["mal","sbom","sign"],c:"ent",p:"Quote",note:"SCA on binaries with no source and no manifest &mdash; firmware, embedded, and commercial third-party software. Also the only credible way to validate an SBOM against the artifact it claims to describe, which matters because an unverifiable SBOM is an assertion rather than evidence."},
+  {n:"ReversingLabs",v:"ReversingLabs",l:["mal","sign","cont"],c:"ent",p:"Quote",note:"Binary analysis and tamper detection on the built artifact &mdash; verifying the compiled output rather than the source or the manifest."},
+
+  // ===== Cloud-provider native =====
+  {n:"Amazon Inspector",v:"AWS",l:["sca","sast","iac","cont"],c:"freemium",p:"$0.15/repository scan; $0.03/image in CI; $1.258/EC2 instance/mo",note:"Now does first-party SAST alongside SCA and IaC, with GitHub and GitLab auto-discovery and Azure coverage. The $0.03 per-image CI rate is very hard to beat for AWS-centric shops. SAST is new and unproven against dedicated tools."},
+  {n:"AWS Signer",v:"AWS",l:["sign"],c:"free",p:"No additional charge",note:"Free code signing with an open-sourced Notation plugin for container images, integrated with EKS. A legitimate Sigstore alternative that sidesteps Rekor &mdash; but only within AWS."},
+  {n:"Google Assured OSS",v:"Google Cloud",l:["gate","sbom"],c:"freemium",p:"Free tier (Python, Go, Java); Premium requires Security Command Center",note:"Trusted, signed builds of roughly 1,000 popular packages consumed through Artifact Registry.",flag:"A supply control for popular packages, not a detection control &mdash; 1,000 curated packages is nowhere near a full dependency graph. Its real competitor is Chainguard Libraries, not an SCA tool.",fw:1},
+  {n:"GCP Binary Authorization + Cloud Build",v:"Google Cloud",l:["sign","run","bld"],c:"freemium",p:"Artifact Analysis $0.26/scan",note:"Cloud Build produces SLSA Build L3 provenance and Binary Authorization enforces it at admission &mdash; a genuinely credible alternative to Sigstore plus Kyverno for GCP-native shops.",flag:"Artifact Analysis language packages do not deduplicate across repositories, unlike container images. Costs escalate quickly at scale.",fw:1},
+  {n:"Defender for Cloud DevOps security",v:"Microsoft",l:["aspm","sast","secdet","sca","iac"],c:"ent",p:"Bundled into Defender CSPM (paid)",note:"Correct current name &mdash; &lsquo;Defender for DevOps&rsquo; was the preview branding. Covers Azure DevOps, GitHub, and GitLab. Its value is posture aggregation across pipelines rather than scanner quality; treat it as ASPM-lite for Azure shops, not as an SAST or SCA replacement."},
+
+  // ===== AI-assisted remediation =====
+  {n:"Corgea",v:"Corgea",l:["remed","sast","sca","iac","secdet"],c:"perdev",p:"Free (2 users/10 repos); Growth $39/dev/mo; Scale $49",note:"AI-native SAST targeting business-logic and authorization flaws that pattern-based tools miss, with autofix. Seats counted as contributors active in the last 90 days."},
+  {n:"Mobb",v:"Mobb",l:["remed"],c:"perdev",p:"Free unlimited on public repos; IDE $20/dev/mo; Team $40",oss:1,note:"An autofix layer on top of other scanners covering 100+ issue types, explicitly not replacing them. The free public-repo tier makes it usable for open source at no cost."},
+  {n:"Pixee",v:"Pixee",l:["remed","aspm"],c:"ent",p:"Outcome-based, priced on annual scanner findings",note:"Agentic triage and fixes. Priced per finding rather than per seat, so it will not compare like-for-like against per-developer tools in a budget model."},
+  {n:"DryRun Security",v:"DryRun Security",l:["sast"],c:"ent",p:"Not published",note:"Contextual PR analysis mapping architecture, data flow, and authorization boundaries. Detects and guides rather than auto-applying fixes &mdash; closer to contextual code review than to the remediation layer."},
+  {n:"Amplify Security",v:"Amplify Security",l:["remed","sast"],c:"perdev",p:"Free for teams of 10 or fewer; Growth $20/user/mo",note:"AI agents producing one-click fixes for insecure code via pull request."},
+
+  // ===== API security =====
+  {n:"42Crunch / APIsec",v:"Two API security vendors",l:["dast"],c:"ent",p:"Quote",note:"Spec-driven API security testing and API discovery in CI &mdash; a distinct buying category from web DAST, and a common gap when a matrix collapses everything into one DAST row."},
+  {n:"StackHawk / Escape",v:"Two vendors",l:["dast"],c:"perdev",p:"Per-app / per-API SaaS",note:"Modern developer-first DAST and API security, far more CI-friendly than legacy DAST."},
+  {n:"Burp Suite DAST",v:"PortSwigger",l:["dast"],c:"ent",p:"Quote",note:"Renamed from Burp Suite Enterprise Edition. Widely treated as the DAST accuracy benchmark, with a GraphQL API for arbitrary CI integration."},
+  {n:"Invicti / Acunetix",v:"Invicti (Summit)",l:["dast","aspm","sca","sast"],c:"ent",p:"Quote",note:"Acquired Kondukto Aug 2025 for proof-based ASPM, correlating runtime-validated DAST findings with posture data."},
+
+  // ===== License compliance =====
+  {n:"FOSSA / FOSSology",v:"FOSSA / Linux Foundation",l:["sbom","sca"],c:"freemium",p:"FOSSA quote; FOSSology free OSS",oss:1,note:"Open-source license and legal compliance, distinct from vulnerability SCA and usually bought by a different team &mdash; legal or the OSPO rather than security. FOSSology is the free option."},
+
+  // ===== Free / OSS =====
+  {n:"Semgrep CE / Opengrep",v:"Semgrep / consortium",l:["sast"],c:"free",p:"Free, LGPL-2.1",oss:1,note:"Opengrep is a consortium-backed fork sidestepping the Semgrep rule-license restriction. Existing rules work unchanged."},
+  {n:"CodeQL",v:"GitHub",l:["sast"],c:"freemium",p:"Free on public repositories",note:"Deepest free SAST available.",flag:"Private repositories require a paid GitHub Code Security license. Not open source, and no glibc-free Linux support.",fw:1},
+  {n:"gosec / staticcheck",v:"Go community",l:["sast"],c:"free",p:"Free, Apache-2.0 / MIT",oss:1,note:"gosec does AST plus SSA taint analysis with SARIF output. staticcheck is correctness-focused rather than security-specific."},
+  {n:"Bandit",v:"PyCQA",l:["sast"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Python SAST with pre-commit and SARIF support."},
+  {n:"Brakeman",v:"Brakeman",l:["sast"],c:"freemium",p:"Free for non-commercial use only",note:"Rails SAST, actively maintained.",flag:"The license grants use only for non-Commercial Use. A software vendor must purchase a license. The most common trap in a free Rails stack.",fw:2},
+  {n:"Trivy",v:"Aqua",l:["sca","cont","iac","secdet","sbom"],c:"free",p:"Free, Apache-2.0",oss:1,note:"The Swiss-army knife: images, filesystems, repositories, VM images, and Kubernetes clusters against CVEs, misconfiguration, secrets, licenses, and SBOM.",flag:"trivy-action tags and Trivy binaries v0.69.4-v0.69.6 were compromised in March 2026. Use v0.69.3 or earlier and trivy-action v0.35.0.",fw:2},
+  {n:"Grype + Syft",v:"Anchore",l:["sca","sbom","cont"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Syft generates SPDX and CycloneDX with inter-format conversion; Grype scans images, filesystems, and Syft SBOMs. No registration for the vulnerability database."},
+  {n:"osv-scanner",v:"Google",l:["sca","cont"],c:"free",p:"Free, Apache-2.0",oss:1,note:"11+ ecosystems, 19+ lockfile types, layer-aware container scanning, and experimental guided remediation. The best free choice for scheduled SBOM rescans."},
+  {n:"govulncheck",v:"Go team",l:["sca"],c:"free",p:"Free, BSD-3-Clause",oss:1,note:"Symbol-level reachability &mdash; reports only vulnerabilities whose vulnerable functions are actually called. The difference between six real findings and two hundred theoretical ones."},
+  {n:"cargo-deny / cargo-audit",v:"RustSec / Embark",l:["sca","gate"],c:"free",p:"Free, Apache-2.0 OR MIT",oss:1,note:"cargo-deny enforces advisories, licenses, dependency bans, duplicate versions, and a registry allowlist. The bans and sources checks operationalize a no-new-dependencies policy mechanically."},
+  {n:"pip-audit",v:"PyPA",l:["sca"],c:"free",p:"Free, Apache-2.0",oss:1,note:"The official PyPA tool. Use this rather than Safety CLI for commercial work."},
+  {n:"OWASP Dependency-Check",v:"OWASP",l:["sca"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Mature Jenkins and Maven integration.",flag:"An NVD API key is effectively mandatory &mdash; without one, database updates are extremely slow. Requires DB caching in CI.",fw:1},
+  {n:"OWASP Dependency-Track",v:"OWASP",l:["sbom","sca"],c:"free",p:"Free, Apache-2.0, self-hosted",oss:1,note:"The free answer to continuous SBOM monitoring &mdash; upload an SBOM, get notified when a component becomes vulnerable later. v4.14.x is end-of-life Dec 2026."},
+  {n:"GuardDog",v:"Datadog",l:["mal"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Free malicious-package detection across PyPI, npm, Go modules, RubyGems, GitHub Actions, and VSCode extensions. The only credible free tool in the behavioral layer, though narrower than the commercial options."},
+  {n:"Gitleaks",v:"Gitleaks",l:["secdet"],c:"free",p:"CLI free, MIT",oss:1,note:"Regex plus entropy detection.",flag:"gitleaks-action has been proprietary since v2.0.0 and needs a free license key for organization accounts. Invoke the MIT CLI in a run: step instead.",fw:1},
+  {n:"TruffleHog",v:"Truffle Security",l:["secdet"],c:"free",p:"Free, AGPL-3.0",oss:1,note:"800+ secret types with live credential verification &mdash; it tests found secrets against their APIs, which nearly eliminates false positives."},
+  {n:"zizmor",v:"Trail of Bits / Grafana",l:["pipe"],c:"free",p:"Free, MIT",oss:1,note:"The highest-leverage single addition to most pipelines. Detects template injection, credential persistence, excessive permissions, impostor commits, and confusing git refs in GitHub Actions."},
+  {n:"actionlint",v:"rhysd",l:["pipe"],c:"free",p:"Free, MIT",oss:1,note:"Strong type checking of workflow expressions, script-injection detection, and embedded shellcheck on run: blocks."},
+  {n:"poutine / octoscan",v:"BoostSecurity / Synacktiv",l:["pipe"],c:"free",p:"Free, Apache-2.0 / GPL-3.0",oss:1,note:"poutine scans an entire GitHub org or GitLab instance with Rego rules. octoscan has the deepest Actions-specific taxonomy &mdash; artifact poisoning, repo-jacking, GITHUB_ENV injection."},
+  {n:"pinact / ratchet / frizbee",v:"Three OSS projects",l:["pipe"],c:"free",p:"Free, MIT / Apache-2.0",oss:1,note:"SHA pinning for CI actions. pinact is best maintained and can enforce a minimum release age &mdash; a quarantine policy for build tooling. frizbee also pins container digests."},
+  {n:"StepSecurity",v:"StepSecurity",l:["pipe","bld","log","src"],c:"perdev",p:"Community free (unlimited public repos); Enterprise $16/dev/mo",oss:1,note:"Effectively EDR for CI runners &mdash; network egress, file integrity, and process monitoring per workflow step. The specialist for the layer almost nothing else covers, and free for open source."},
+  {n:"OpenSSF Scorecard",v:"OpenSSF",l:["src","pipe"],c:"free",p:"Free, Apache-2.0",oss:1,note:"23 automated checks including Branch-Protection, Dangerous-Workflow, Token-Permissions, Pinned-Dependencies, and Signed-Releases. Public dataset and REST API."},
+  {n:"Allstar",v:"OpenSSF",l:["src"],c:"free",p:"Free hosted GitHub App",oss:1,note:"Continuously enforces branch protection, CODEOWNERS, outside-collaborator, and dangerous-workflow policy.",flag:"Release cadence slowing &mdash; v4.5 was Oct 2025, though there is no deprecation notice.",fw:1},
+  {n:"Checkov",v:"Palo Alto Networks",l:["iac","pipe","sca"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Also scans CI/CD pipeline definitions across GitHub Actions, GitLab CI, Azure Pipelines, BitBucket, CircleCI, and Argo. Powers the paid Cortex Cloud IaC engine."},
+  {n:"KICS",v:"Checkmarx",l:["iac"],c:"free",p:"Free, Apache-2.0",oss:1,note:"20+ IaC platforms, actively maintained."},
+  {n:"Kubescape",v:"CNCF / ARMO",l:["cont","run","iac"],c:"free",p:"Free, Apache-2.0",oss:1,note:"CNCF incubating. Scans clusters, YAML, images, and Helm against NSA-CISA, MITRE ATT&amp;CK, and CIS frameworks."},
+  {n:"hadolint",v:"hadolint",l:["cont"],c:"free",p:"Free, GPL-3.0",oss:1,note:"Dockerfile linting with ShellCheck on RUN blocks."},
+  {n:"OWASP ZAP",v:"ZAP by Checkmarx",l:["dast"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Baseline and full-scan modes with an automation framework.",flag:"Governance moved from OWASP to Checkmarx. Still Apache-2.0 and community-contributed, but note the stewardship change.",fw:1},
+  {n:"Nuclei",v:"ProjectDiscovery",l:["dast"],c:"free",p:"Free, MIT",oss:1,note:"YAML-templated scanning across HTTP, TCP, DNS, and SSL. Engine and templates both MIT."},
+  {n:"OSS-Fuzz / ClusterFuzzLite",v:"Google",l:["dast"],c:"free",p:"Free service",oss:1,note:"Continuous fuzzing for qualifying open-source projects.",flag:"OSS-Fuzz is eligibility-gated rather than self-serve &mdash; a project must have a significant user base or be critical infrastructure. ClusterFuzzLite runs the same technology in your own CI as the fallback.",fw:1},
+  {n:"Sigstore cosign",v:"Sigstore / OpenSSF",l:["sign"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Keyless signing via Fulcio and the Rekor transparency log using CI OIDC, so there are no stored signing secrets. The public-good instance is what makes this genuinely zero-cost."},
+  {n:"GitHub artifact attestations",v:"GitHub",l:["sign"],c:"free",p:"Free",oss:1,note:"Lowest-friction provenance available. SLSA v1.0 Build L2 out of the box, L3 achievable by combining with reusable workflows. Verify with gh attestation verify."},
+  {n:"in-toto / witness",v:"CNCF",l:["sign","bld"],c:"free",p:"Free, Apache-2.0",oss:1,note:"in-toto graduated CNCF Apr 2025. witness implements ITE-5/6/7 with an OPA Rego policy engine for verification, and pairs with Archivista for attestation storage."},
+  {n:"slsa-github-generator / verifier",v:"SLSA Framework",l:["sign","bld"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Reusable workflows achieving SLSA Build L3+. Go and Generic builders are stable; Node, Maven, Gradle, and Container are beta.",flag:"Generator cadence slowing &mdash; last release Feb 2025, no deprecation notice.",fw:1},
+  {n:"CycloneDX / SPDX tooling",v:"OWASP / Linux Foundation",l:["sbom"],c:"free",p:"Free, OSI-approved",oss:1,note:"CycloneDX is ECMA-424. cdxgen is a universal polyglot generator; cyclonedx-cli merges, diffs, converts, signs, and validates. sbomqs grades SBOM quality."},
+  {n:"Kyverno / policy-controller",v:"CNCF / Sigstore",l:["run"],c:"free",p:"Free, Apache-2.0",oss:1,note:"Admission-time enforcement that only cosign-verified images run. Closes the loop on signing &mdash; without this, an attestation is decoration."},
+  {n:"Falco",v:"CNCF / Sysdig",l:["run","log"],c:"free",p:"Free, Apache-2.0",oss:1,note:"The CNCF runtime detection standard, with syscall-level behavioral rules."},
+  {n:"Renovate / Dependabot",v:"Mend / GitHub",l:["remed","sca","gate"],c:"free",p:"Free",oss:1,note:"The actual fix path for most SCA findings. Renovate self-hosted is AGPL-3.0; Mend Community Cloud is free for unlimited public and private repositories. Use either to propose SHA bumps for pinned actions so they arrive as reviewable diffs."},
+  {n:"Anchore Enterprise",v:"Anchore",l:["sbom","sca","cont"],c:"ent",p:"Enterprise quote; Syft and Grype are separate and free",note:"Maintains Syft and Grype. Strong federal and FedRAMP SBOM compliance positioning."},
+  {n:"Docker Scout",v:"Docker",l:["cont","sbom"],c:"freemium",p:"Personal tier covers 1 repository",note:"Actively maintained as of Jul 2026.",flag:"A one-repository free tier makes this the weakest free offering in the container layer. Trivy or Grype replace it at zero cost.",fw:1},
+
+  // ===== Dead / retired =====
+  {n:"Terrascan",v:"Tenable",l:["iac"],c:"free",p:"&mdash;",dead:1,note:"Archived 20 Nov 2025: no further updates, issues, or pull requests. Last release Sep 2024. Replace with Checkov, KICS, or Trivy."},
+  {n:"tfsec",v:"Aqua",l:["iac"],c:"free",p:"&mdash;",dead:1,note:"Merged into Trivy. The repository tagline now reads &lsquo;tfsec is now part of Trivy&rsquo;. Migrate rather than adopt."},
+  {n:"chain-bench",v:"Aqua",l:["src","pipe"],c:"free",p:"&mdash;",dead:1,note:"Audits against the CIS Software Supply Chain Benchmark, but unreleased since January 2024. The concept is sound; the implementation is stale."},
+  {n:"git-secrets",v:"awslabs",l:["secdet"],c:"free",p:"&mdash;",dead:1,note:"Zero published releases, 93 open issues, 38 open pull requests. Effectively unmaintained despite 13k stars. Use the Gitleaks CLI."},
+  {n:"Safety CLI",v:"Safety",l:["sca"],c:"freemium",p:"From $25/seat/mo",note:"Python dependency scanning.",flag:"The free plan is single-user and explicitly not recommended for commercial purposes, with a limited database. Use pip-audit or osv-scanner instead.",fw:2},
+  {n:"AWS CodeGuru Security",v:"AWS",l:["sast"],c:"ent",p:"&mdash;",dead:1,note:"End of support 20 Nov 2025, with historical findings unmigratable. Succeeded by Amazon Q Developer and Amazon Inspector."},
+  {n:"HCP Vault Secrets",v:"IBM / HashiCorp",l:["secmgmt"],c:"ent",p:"&mdash;",dead:1,note:"End of sale Jun 2025, end of life Jul 2026. Use Vault, OpenBao, or a cloud-native secret store."},
+  {n:"Phylum",v:"Acquired by Veracode",l:["mal","gate"],c:"ent",p:"&mdash;",dead:1,note:"No longer exists independently &mdash; technology acquired by Veracode Jan 2025. List the capability under Veracode."},
+  {n:"Root.io",v:"Acquired by Aikido",l:["base","remed"],c:"ent",p:"&mdash;",dead:1,note:"Acquired by Aikido Security Jun 2026; the product site now redirects. The capability ships as Aikido Libraries and its hardened image catalog."},
+  {n:"Grafana / Honeycomb / Chronosphere",v:"Observability only",l:[],c:"free",p:"&mdash;",dead:1,note:"Listed only to record a deliberate exclusion. None of the three sells an application security, vulnerability management, or runtime protection product &mdash; their security pages describe their own compliance posture or dashboards for other vendors' tools. Chronosphere was acquired by Palo Alto Networks in Jan 2026, but the product remains pure observability. Including them in a security matrix would be misleading."}
+];
+
+const INCIDENTS = [
+  {mo:"Aug",y:"2026",n:"CHAINDROP",sub:"npm worm, Shai-Hulud lineage",verdict:"contained",
+   l:["gate","mal","ai","secmgmt"],stage:"Build &mdash; and outside it",
+   what:"Beginning with keyv at 09:35 UTC on 4 August, 444 packages across 2,212 versions were trojanized in roughly four hours &mdash; about one package per second &mdash; reaching packages with around two billion monthly downloads. Detection was fast: flagged within six minutes, public within 45, unpublished within two hours.",
+   why:"Propagation used a preinstall hook, but the novel vectors were elsewhere: a VS Code tasks.json entry set to run on folder open, an AI coding-agent SessionStart hook, and malicious config committed across up to 50 branches per repository with commits disguised as AI-assistant output. Command-and-control domains were stored in an Ethereum smart contract, rotatable by a single transaction.",
+   note:"The reason this is not marked preventable: an intake quarantine does stop the package, and disabled lifecycle scripts stop the loader &mdash; but a developer opening a repository in an editor is not a pipeline event at all, and no control in a CI/CD matrix covers it. The lesson generalizes past npm: repository-supplied configuration is executable content, and most tooling still treats it as inert data. Note also the inverted incident response &mdash; a watchdog polls the stolen tokens and wipes the home directory on revocation, so isolate hosts before rotating anything."},
+
+  {mo:"Sep",y:"2025",n:"Shai-Hulud",sub:"first self-replicating npm worm",verdict:"prevented",
+   l:["gate","mal","secmgmt","nhi"],stage:"Build &rarr; publish",
+   what:"Patient zero was rxnt-authentication on 14 September; the community noticed a day later when a package with 2M weekly downloads was hit. On finding an npm token the worm republished itself into the twenty most popular packages that token could reach. Over 500 packages before npm contained it.",
+   why:"It bundled TruffleHog &mdash; a legitimate credential scanner &mdash; to harvest 800+ secret types from the victim machine, exfiltrated to public GitHub repositories, and copied victims&rsquo; private repositories to public ones with a migration suffix.",
+   note:"What actually throttled it is worth knowing: the attacker used a free-tier webhook service that stopped working after 100 callbacks. The campaign was partly limited by the attacker being cheap. npm&rsquo;s structural fix &mdash; permanently revoking all classic tokens and moving to two-hour session credentials &mdash; landed in December 2025, after the second wave. It was reactive, not preventive."},
+
+  {mo:"Mar",y:"2025",n:"tj-actions/changed-files",sub:"CVE-2025-30066",verdict:"prevented",
+   l:["pipe","secmgmt","log"],stage:"Build",
+   what:"A stolen bot account token was used to push one malicious commit, then retroactively force-update essentially every release tag &mdash; from v1.0.0 to v45 &mdash; to point at it. The payload read runner process memory and printed harvested secrets into the build log.",
+   why:"There was no outbound exfiltration at all. The attacker relied on public repository build logs being world-readable, and double-base64-encoded the values to defeat log masking. Around 23,000 repositories referenced the action; 237 actually leaked secrets in the roughly twelve-hour window.",
+   note:"SHA pinning was fully effective &mdash; the malicious commit had a different hash, so pinned workflows never fetched it. The exception proves the point: repositories with automated pin-bumping and automerge had their pins mechanically rewritten to the malicious commit. Pinning without human review on bump pull requests is pinning in form only. Detection came from runner egress monitoring, not code review."},
+
+  {mo:"Dec",y:"2024",n:"Ultralytics YOLO",sub:"poisoned pipeline execution",verdict:"prevented",
+   l:["pipe","bld","secmgmt"],stage:"PR &rarr; publish",
+   what:"A workflow using the pull_request_target trigger interpolated the pull request branch name into a shell command unquoted. The attacker named their branch a command substitution, obtained execution in a privileged context, and wrote a poisoned build cache that the legitimate release workflow later consumed.",
+   why:"The first wave used no stolen credential at all. The malicious wheel was built and published through the project&rsquo;s legitimate trusted publishing workflow, and carried valid attestations. The second wave used an API token left unrevoked when the project migrated to trusted publishing.",
+   note:"The second of three cases here where provenance attested to malware. Attestation binds identity, not correctness. Workflow static analysis flags this exact injection pattern for free, and release builds should never consume a cache that untrusted pull requests can write."},
+
+  {mo:"Mar",y:"2024",n:"xz-utils / liblzma",sub:"CVE-2024-3094",verdict:"prevented",
+   l:["bld","src"],stage:"Build",
+   what:"A two-and-a-half year social engineering campaign, including sockpuppet accounts pressuring an overworked maintainer into granting release authority. The payload was split across two channels: high-entropy binary blobs committed to the repository as compression test fixtures, and a modified build macro present only in the release tarball, never in git.",
+   why:"Neither half looks like anything alone. Binary test data is exactly what a compression library is expected to contain, and autotools release tarballs are generated artifacts that nobody diffs against the repository. Activation was guarded to x86-64 glibc Linux under a Debian or RPM build context, so building from git did nothing at all.",
+   note:"The counterexample that should temper any confidence in this matrix. No SCA tool, no signing, no malicious-package scanner, and no code review would have found it. Exactly one control bites: build releases from version control, or byte-diff the tarball against git. It was found by a database engineer investigating 500ms of unexplained SSH latency during a benchmark run."},
+
+  {mo:"Dec",y:"2023",n:"Ledger connect-kit",sub:"offboarding gap",verdict:"prevented",
+   l:["src","nhi","gate"],stage:"Publish",
+   what:"A former employee whose npm access had never been revoked at offboarding was spear-phished. Three malicious versions carrying a wallet drainer were published over about two hours; roughly $500&ndash;600k was stolen before the fix landed.",
+   why:"System access had been properly revoked. The registry publishing account sat outside whatever offboarding checklist covered internal systems &mdash; a joiner-mover-leaver gap on a third-party SaaS account.",
+   note:"The amplifier was downstream: many applications loaded the package from a public CDN at a floating version, so the drainer reached end users on the next page load with no rebuild and no deploy by anyone. Pinning plus subresource integrity would have given every downstream party a chance to notice."},
+
+  {mo:"Jan",y:"2023",n:"CircleCI",sub:"session token theft",verdict:"contained",
+   l:["secmgmt","nhi","log"],stage:"All stages",
+   what:"Malware on an engineer&rsquo;s laptop evaded antivirus and stole a valid, already-authenticated SSO session cookie. The attacker replayed it, inheriting that engineer&rsquo;s legitimate ability to generate production tokens, and exfiltrated customer environment variables, tokens, and keys.",
+   why:"2FA is an authentication-time control and a session cookie is a post-authentication bearer token &mdash; the attacker never logged in, so no challenge was ever issued. Data encrypted at rest was readable because the keys were extracted from a running process.",
+   note:"The clearest available demonstration of why credential design outranks any scanner. Every customer storing a long-lived static secret had to rotate everything, whether or not they were touched. With short-lived OIDC credentials the provider holds no reusable secret, and the blast radius shrinks to whatever was live during the window."},
+
+  {mo:"Dec",y:"2022",n:"PyTorch torchtriton",sub:"dependency confusion",verdict:"prevented",
+   l:["gate"],stage:"Build",
+   what:"The documented nightly install used an extra index URL alongside public PyPI. An attacker registered the private dependency&rsquo;s name on PyPI; pip merges candidates from both indexes into one flat list with no binding between package and source of truth, and the public copy won.",
+   why:"The payload exfiltrated /etc/passwd, environment variables, git config, everything in ~/.ssh, and the first thousand files in the home directory, over DNS tunneling to evade egress filtering.",
+   note:"The fix was two lines of policy: register your internal package names defensively on the public index, and use a controlled mirror rather than an extra index. This is the cheapest prevention on the entire list."},
+
+  {mo:"Dec",y:"2021",n:"Log4Shell",sub:"CVE-2021-44228",verdict:"contained",
+   l:["sbom","sca","remed"],stage:"Continuous",
+   what:"Not a compromise &mdash; a vulnerability, and therefore the cleanest test of whether an organization knows what it ships. Over 17,000 Maven Central packages were affected, more than 4% of the ecosystem, but only ~3,500 depended on Log4j directly.",
+   why:"More than 80% carried it more than one level deep, with the majority five levels down and the deepest at nine. Shaded and repackaged JARs had no matching filename and often a rewritten package path, so filename-based scanning simply missed them.",
+   note:"The Cyber Safety Review Board&rsquo;s most pointed finding: of the organizations it interviewed, none reported having used SBOMs to locate vulnerable deployments, because the SBOMs they had lacked version information and consistent fields. One federal department spent 33,000 hours on response. No control prevents a zero-day &mdash; but the gap between hours and months of response is entirely an inventory question."},
+
+  {mo:"Oct",y:"2021",n:"ua-parser-js",sub:"npm account takeover",verdict:"prevented",
+   l:["gate","mal","pipe"],stage:"PR &rarr; build",
+   what:"Three release lines were published simultaneously with a preinstall hook that ran a cryptominer and, on Windows, a credential stealer targeting 100+ applications. Live for roughly four hours on 22 October.",
+   why:"The preinstall hook executes on install, before any of the library&rsquo;s code is imported &mdash; so merely resolving the dependency in CI was sufficient for compromise. GitHub&rsquo;s advisory told affected users to treat the entire machine as compromised.",
+   note:"A four-hour window defeats every control that depends on human review, periodic scanning, or advisory publication latency. What survives is automatic and preventive: lockfile pinning with integrity hashes, disabled install scripts, and a registry mirror with a quarantine delay."},
+
+  {mo:"Apr",y:"2021",n:"Codecov Bash Uploader",sub:"credential in a Docker layer",verdict:"prevented",
+   l:["secmgmt","sign","bld"],stage:"Build",
+   what:"A cloud storage key was extractable from an intermediate layer of a public Docker image &mdash; deleted in a later layer, but Docker layers persist. The attacker used it to append one line to the uploader script, dumping the full CI environment to an external host. Nine weeks undetected.",
+   why:"The uploader ran inside CI after environment population, which is the highest-yield position in any pipeline. It captured cloud credentials, registry tokens, and signing keys. One downstream vendor had to revoke the GPG key used to sign its product releases.",
+   note:"A correct integrity mechanism existed &mdash; checksums published on GitHub, outside the attacker&rsquo;s reach &mdash; and it worked, once, after nine weeks, because a single customer bothered to check. The documented integration was piping a fetched script straight into a shell. An opt-in, undocumented control is a control on paper only."},
+
+  {mo:"Dec",y:"2020",n:"SolarWinds SUNBURST",sub:"build server implant",verdict:"detected",
+   l:["bld","sign","log"],stage:"Build",
+   what:"An implant on the build server watched for the compiler process, swapped a backdoored source file into place before compilation, then restored the original afterwards. The SCM was clean, the developer machines were clean, and the build logs were clean. Roughly nine months of trojanized builds shipped to customers.",
+   why:"The malicious DLL was validly code-signed with SolarWinds&rsquo; own certificate, because injection happened upstream of signing. Signing, checksums, and secure distribution all worked exactly as designed and all faithfully certified malware.",
+   note:"The sharpest lesson in this set for anyone scoring code signing as a mitigation: it attests to who built an artifact, never to what went into it. Only reproducible builds would have surfaced the divergence. It was ultimately found by an MFA enrollment anomaly at one unusually capable customer &mdash; no security control found it."},
+
+  {mo:"Nov",y:"2018",n:"event-stream",sub:"npm maintainer handover",verdict:"prevented",
+   l:["mal","gate","src"],stage:"PR &rarr; build",
+   what:"An unmaintained package with ~2M weekly downloads was handed to a volunteer who asked for it by email. After weeks of benign commits, they added a dependency on 9 September and shipped the payload inside it on 5 October. Live roughly seven and a half weeks.",
+   why:"The payload decrypted itself using the consuming package&rsquo;s own description field as the key, so it did nothing at all except on machines building one specific bitcoin wallet. It was invisible to researchers, sandboxes, and every CI system that was not the target.",
+   note:"The published npm tarball did not match the GitHub source &mdash; the malicious code existed only in minified form in the tarball. Artifact-versus-repository diffing catches this class outright, and a quarantine period on new versions blunts it even without any analysis."},
+
+  {mo:"Sep",y:"2017",n:"Equifax",sub:"Apache Struts CVE-2017-5638",verdict:"prevented",
+   l:["sbom","sca","remed"],stage:"Build &rarr; continuous",
+   what:"A critical Struts RCE was disclosed on 6 March and Equifax set a 48-hour patch SLA the same week. The dispute portal running the vulnerable component was never patched. Sustained data extraction ran from 13 May to 30 July &mdash; 76 days.",
+   why:"The failure was not ignorance of the CVE. The alert went to a stale distribution list, so the team owning the affected system never saw it, and a verification scan was run against the wrong directory &mdash; producing a clean result that <em>confirmed</em> the mistaken belief they were unaffected.",
+   note:"This is an inventory failure, not a patching failure. A build-time SBOM answers &lsquo;where is this component&rsquo; deterministically; a runtime scan answers it only where you thought to look. The compensating control here actively reinforced the error."}
+];
+
+const PATHS = [
+  {id:"A",n:"Zero cost",cost:"$0 licensing",
+   kit:"Trivy, osv-scanner, govulncheck, Syft + Dependency-Track, Gitleaks, zizmor + actionlint + pinact, cosign + GitHub attestations, Checkov, GuardDog, Kyverno, CI-native OIDC, Renovate cooldowns"},
+  {id:"B",n:"Platform-native",cost:"~$59k/yr",
+   kit:"GitHub Code Security + Secret Protection: CodeQL, Dependabot, dependency review, secret scanning, push protection"},
+  {id:"C",n:"Developer-first",cost:"~$90&ndash;180k/yr",
+   kit:"Snyk or Semgrep + Socket + StepSecurity, optionally Aikido"},
+  {id:"D",n:"Enterprise suite",cost:"~$250&ndash;600k/yr",
+   kit:"Checkmarx, Veracode or Black Duck + JFrog or Sonatype registry gateway"}
+];
+
+// f = full (a control in this path prevents it) | p = partial (detects or reduces blast radius) | n = none
+const COVER = [
+  {k:"CHAINDROP",y:"2026",dec:"Cooldown on new versions, disabled lifecycle scripts",
+   A:"p",B:"p",C:"f",D:"f",
+   why:"Every path stops the package; none covers the editor and agent hook vector, because opening a repository is not a pipeline event."},
+  {k:"Shai-Hulud",y:"2025",dec:"Cooldown, disabled lifecycle scripts, no standing npm tokens",
+   A:"f",B:"p",C:"f",D:"f",
+   why:"Platform-native gets a Dependabot alert after the fact rather than a block at install."},
+  {k:"tj-actions",y:"2025",dec:"SHA-pinned actions, runner egress monitoring",
+   A:"f",B:"p",C:"f",D:"n",
+   why:"The enterprise suite misses this entirely &mdash; CI/CD workflow security is not in any of the big AppSec platforms. Free pinning tools prevent it; StepSecurity is what actually detected it."},
+  {k:"Ultralytics",y:"2024",dec:"Workflow static analysis, no untrusted cache in release builds",
+   A:"f",B:"n",C:"f",D:"n",
+   why:"zizmor flags this exact injection pattern for nothing. Neither the platform SKU nor the enterprise suite looks at workflow definitions this way."},
+  {k:"xz-utils",y:"2024",dec:"Build releases from version control",
+   A:"f",B:"n",C:"n",D:"n",
+   why:"No commercial tool on this list would have caught it. The only control that bites is a build practice that costs nothing and is rarely done."},
+  {k:"Ledger",y:"2023",dec:"Pinned versions with subresource integrity, offboarding coverage",
+   A:"f",B:"n",C:"p",D:"p",
+   why:"Behavioral scanners flag the bad version, but the CDN delivery path bypasses the package manager entirely. Pinning plus SRI is the consumer-side fix."},
+  {k:"CircleCI",y:"2023",dec:"Short-lived OIDC credentials",
+   A:"f",B:"f",C:"f",D:"p",
+   why:"Everyone covers this, because the control is free and architectural. The enterprise path scores lower only because buying a suite does not itself remove standing secrets."},
+  {k:"torchtriton",y:"2022",dec:"Namespace registration, controlled mirror instead of an extra index",
+   A:"f",B:"n",C:"p",D:"f",
+   why:"The one case where the enterprise gateway is the cleanest answer &mdash; a curated proxy makes dependency confusion structurally impossible."},
+  {k:"Log4Shell",y:"2021",dec:"SBOM with scheduled rescan",
+   A:"f",B:"f",C:"f",D:"f",
+   why:"All four paths cover it. The differentiator is whether your SBOM tooling inspects nested archives, since shaded JARs defeat filename matching."},
+  {k:"ua-parser-js",y:"2021",dec:"Lockfile pinning, disabled install scripts, cooldown",
+   A:"f",B:"p",C:"f",D:"f",
+   why:"A four-hour window defeats anything that depends on review cadence or advisory latency."},
+  {k:"Codecov",y:"2021",dec:"Verify checksums on fetched scripts, no standing secrets in CI",
+   A:"f",B:"f",C:"f",D:"p",
+   why:"Really a practice rather than a product. The available integrity check was opt-in and undocumented, which made it a control on paper only."},
+  {k:"SolarWinds",y:"2020",dec:"Reproducible builds",
+   A:"p",B:"n",C:"n",D:"n",
+   why:"Signing certified the malware. Only build reproducibility surfaces the divergence, and free tooling exists but the practice is hard. Binary analysis specialists are the nearest commercial answer and sit outside all four paths."},
+  {k:"event-stream",y:"2018",dec:"Artifact-versus-repository diffing, cooldown",
+   A:"f",B:"n",C:"f",D:"f",
+   why:"The tarball did not match the repository. Quarantine blunts it even without any analysis at all."},
+  {k:"Equifax",y:"2017",dec:"Build-time dependency inventory, enforced patch SLA",
+   A:"f",B:"f",C:"f",D:"f",
+   why:"All four paths cover it. The 2017 failure was that no path was implemented, not that the right one was unavailable."}
+];
+
+const FORMULA = [
+  {n:1,t:"Pin everything by digest",
+   d:"Commit-SHA pins on CI actions, lockfiles with integrity hashes, digest-pinned container images, subresource integrity on anything loaded from a CDN. Then require human review on pin-bump pull requests &mdash; automerged bumps rewrite your pins to whatever the attacker just published.",
+   covers:["tj-actions","Ledger","ua-parser-js","event-stream","CHAINDROP"],layer:"10, 5, 13"},
+  {n:2,t:"Hold no standing credentials",
+   d:"OIDC-issued short-lived tokens everywhere, no static personal access tokens, no long-lived registry credentials, ephemeral signing identity per run. The goal is that a full compromise of your CI finds nothing durable worth stealing.",
+   covers:["CircleCI","Codecov","tj-actions","Shai-Hulud"],layer:"2, 18"},
+  {n:3,t:"Quarantine new versions",
+   d:"A minimum release age before any new dependency version enters a build. Observed exposure windows in recent incidents ran two to five hours; a seven-day cooldown clears all of them. pnpm v11 now defaults to 24 hours, and Renovate, Dependabot and npm all support it.",
+   covers:["CHAINDROP","Shai-Hulud","ua-parser-js","event-stream","torchtriton"],layer:"5"},
+  {n:4,t:"Disable lifecycle scripts",
+   d:"Install with scripts off by default. This single flag neutralizes the loader stage of most npm worm campaigns, including every wave of the Shai-Hulud family. It does not cover editor or agent hooks, which is the current gap.",
+   covers:["CHAINDROP","Shai-Hulud","ua-parser-js"],layer:"5, 7"},
+  {n:5,t:"Build from version control, reproducibly",
+   d:"Never build a release from a published tarball you did not generate, and make the build hermetic enough that a third party can reproduce the artifact bit for bit. Release builds must not consume any cache that untrusted pull requests can write.",
+   covers:["xz-utils","SolarWinds","event-stream","Ultralytics"],layer:"9, 11"},
+  {n:6,t:"Generate an SBOM and rescan it on a schedule",
+   d:"Produced at build time, not inferred at runtime, and covering nested archives so shaded and repackaged components are visible. Then rescan the shipped inventory nightly, because the release gate is a point-in-time check and vendored code goes stale silently.",
+   covers:["Equifax","Log4Shell"],layer:"12, 6"},
+  {n:7,t:"Lint your workflows and least-privilege the runner",
+   d:"Static analysis of CI definitions catches template injection and excessive permissions before they merge. Scope the runner token to the minimum, and monitor egress so a compromised step has nowhere to send anything.",
+   covers:["Ultralytics","tj-actions","CHAINDROP"],layer:"10"}
+];
+
+/* ---------- render coverage ---------- */
+(function(){
+  const scores = {};
+  PATHS.forEach(p=>{
+    scores[p.id] = {f:COVER.filter(c=>c[p.id]==="f").length, p:COVER.filter(c=>c[p.id]==="p").length};
+  });
+  document.getElementById("pathkey").innerHTML = PATHS.map(p=>
+    '<div class="pk"><div class="pid">Path '+p.id+' &middot; '+p.n+'</div>'+
+    '<div class="pcost">'+p.cost+'</div>'+
+    '<div class="pscore">'+scores[p.id].f+' <span style="font-size:14px;font-weight:500;color:var(--ink-3)">of 14 prevented</span></div>'+
+    '<div class="pcost">plus '+scores[p.id].p+' partial</div>'+
+    '<div class="pkit">'+p.kit+'</div></div>').join('');
+
+  const t=document.getElementById("cov-table");
+  t.querySelector("thead").innerHTML='<tr><th>Incident</th><th>Decisive control</th>'+
+    PATHS.map(p=>'<th class="pcol">'+p.id+'</th>').join('')+'<th>Notes</th></tr>';
+  const gl={f:'&#9679;',p:'&#9678;',n:'&mdash;'};
+  const tt={f:'Prevented',p:'Partial',n:'Not covered'};
+  t.querySelector("tbody").innerHTML=COVER.map(c=>
+    '<tr><td class="kcell"><strong>'+c.k+'</strong><span>'+c.y+'</span></td>'+
+    '<td class="dec">'+c.dec+'</td>'+
+    PATHS.map(p=>'<td class="pcell"><span class="cov '+c[p.id]+'" title="Path '+p.id+': '+tt[c[p.id]]+'">'+gl[c[p.id]]+'</span></td>').join('')+
+    '<td class="whyc">'+c.why+'</td></tr>').join('');
+
+  document.getElementById("form-list").innerHTML=FORMULA.map(f=>
+    '<div class="form-item"><div class="form-num">'+f.n+'</div>'+
+    '<div class="form-body"><h3>'+f.t+'</h3><p>'+f.d+'</p>'+
+    '<div class="form-meta"><span class="mlbl">Covers</span>'+
+      f.covers.map(c=>'<span class="tag">'+c+'</span>').join('')+
+      '<span class="mlbl" style="margin-left:10px">Layers</span><span class="tag">'+f.layer+'</span>'+
+      '<span class="mlbl" style="margin-left:10px">Cost</span><span class="pill free">$0 licensing</span>'+
+    '</div></div></div>').join('');
+})();
+
+/* ---------- render incidents ---------- */
+(function(){
+  const lname={}, lshort={};
+  LAYERS.forEach(L=>{lname[L.id]=L.n+". "+L.name.replace(/&amp;/g,'&'); lshort[L.id]=L.n+" "+L.short;});
+  const vlabel={prevented:"Preventable",contained:"Contained only",detected:"Detected only"};
+
+  const lf=document.getElementById("ilf");
+  const used=[...new Set(INCIDENTS.flatMap(i=>i.l))].sort((a,b)=>{
+    const A=LAYERS.find(x=>x.id===a), B=LAYERS.find(x=>x.id===b); return A.n-B.n;});
+  used.forEach(id=>{const L=LAYERS.find(x=>x.id===id);
+    const o=document.createElement("option");o.value=id;o.innerHTML=L.n+". "+L.name;lf.appendChild(o);});
+
+  document.getElementById("inc-list").innerHTML = INCIDENTS.map(I=>
+    '<article class="inc" data-verdict="'+I.verdict+'" data-layers="'+I.l.join(' ')+'">'+
+      '<div class="inc-year"><span class="mo">'+I.mo+'</span><span class="yr">'+I.y+'</span></div>'+
+      '<div class="inc-body">'+
+        '<div class="inc-head"><h3>'+I.n+'</h3><span class="sub">'+I.sub+'</span>'+
+          '<span class="vp '+I.verdict+'" style="margin-left:auto">'+vlabel[I.verdict]+'</span></div>'+
+        '<p>'+I.what+'</p>'+
+        '<p class="why">'+I.why+'</p>'+
+        '<div class="inc-note"><span class="nlbl">What it means for the matrix</span><p>'+I.note+'</p></div>'+
+        '<div class="inc-meta"><span class="mlbl">Layers</span>'+
+          I.l.map(id=>'<span class="tag" title="'+lname[id]+'">'+lshort[id]+'</span>').join('')+
+          '<span class="mlbl" style="margin-left:10px">Stage</span><span class="tag">'+I.stage+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</article>'
+  ).join('');
+
+  const vf=document.getElementById("ivf"), cnt=document.getElementById("icount");
+  function apply(){
+    const V=vf.value, L=lf.value; let shown=0;
+    document.querySelectorAll("#inc-list .inc").forEach(el=>{
+      let ok=true;
+      if(V && el.dataset.verdict!==V) ok=false;
+      if(L && el.dataset.layers.split(' ').indexOf(L)===-1) ok=false;
+      el.style.display = ok ? "" : "none"; if(ok) shown++;
+    });
+    cnt.textContent = shown+" of "+INCIDENTS.length+" incidents";
+  }
+  [vf,lf].forEach(el=>el.addEventListener("input",apply));
+  apply();
+})();
+
+const ECOSYS = [
+  {e:"Go",t:3,acq:"n",bld:"n",
+   ctrl:"Nothing to disable &mdash; no hook mechanism exists",
+   note:"The only ecosystem here where neither acquiring nor compiling a dependency invokes dependency-authored code by design. One honest caveat: cgo directives let a dependency influence the flags passed to the host C compiler, behind an allowlist that has needed CVE fixes. Setting CGO_ENABLED=0 removes that surface. go generate exists but never runs automatically."},
+  {e:"Composer",l:"PHP",t:1,acq:"y",bld:"na",
+   ctrl:"allow-plugins &mdash; default-deny, fails closed; --no-plugins, --no-scripts",
+   note:"The strongest allowlist in this table, with an asymmetry worth knowing: scripts declared by a dependency never run, only the root package&rsquo;s do. Plugins are the dependency-authored vector, and they have been default-deny since Composer 2.2. In non-interactive mode an unlisted plugin fails the build rather than silently proceeding."},
+  {e:"npm family",l:"pnpm, yarn, bun",t:1,acq:"y",bld:"na",
+   ctrl:"npm 12 allowScripts; pnpm allowBuilds; bun trustedDependencies",
+   note:"Where the incidents happened, and now where the tooling is best. npm 12 flipped the default to blocked in August 2026, joining pnpm 10, bun and yarn berry. All four share one shape: deny by default, allowlist named packages, keep the list in version control so additions are reviewable in a pull request."},
+  {e:"pip / uv",l:"Python",t:1,acq:"y",bld:"na",
+   ctrl:"--only-binary=:all: refuses source distributions entirely",
+   note:"The cleanest single setting in the table. Wheels execute nothing at install; source distributions run setup.py, which is arbitrary Python. Refusing sdists therefore refuses all install-time execution at once. Note that PEP 517 build isolation is a dependency-hygiene feature, not a sandbox &mdash; the build backend still runs as your user with full filesystem and network access."},
+  {e:"RubyGems",l:"Ruby",t:1,acq:"y",bld:"na",
+   ctrl:"None &mdash; no flag to refuse native extensions",
+   note:"No generic install hook, but native extensions run extconf.rb, which is a complete arbitrary-code path with the installing user&rsquo;s privileges. RubyGems&rsquo; own guidance steers users away from signing, which lacks a chain of trust in practice, and toward lockfile checksums, cooldown and auditing."},
+  {e:"Conan",l:"C / C++",t:1,acq:"y",bld:"y",
+   ctrl:"None &mdash; no sandbox, no allowlist",
+   note:"Recipes are Python that executes inside your Conan process on install. A dependency&rsquo;s package_info() runs on your machine even when you download a prebuilt binary, because that is its purpose. python_requires pulls in further arbitrary Python."},
+  {e:"vcpkg",l:"C / C++",t:1,acq:"y",bld:"y",
+   ctrl:"None",
+   note:"Portfiles are CMake scripts with full command execution, and the model is source-build-by-default, so installing is building. Worth noting alongside it that CMake FetchContent executes the fetched project&rsquo;s CMakeLists during the configure step."},
+  {e:"Maven",l:"Java",t:2,acq:"n",bld:"y",
+   ctrl:"None &mdash; no allowlist, no disable",
+   note:"Dependency archives are inert at resolution. The surface is plugins, build extensions and .mvn/extensions.xml, which loads third-party code at startup before any build logic. Most SCA tooling scans the dependency block and ignores the plugin block, and a third-party parent POM can inject plugins with no change to your own file."},
+  {e:"Gradle",l:"Java",t:2,acq:"n",bld:"y",
+   ctrl:"None for execution; dependency verification gates which artifacts load",
+   note:"Build scripts are code that runs during the configuration phase of every invocation, including gradle tasks. Dependency verification is the real gate, and it covers plugin artifacts too, so an unlisted plugin fails before it is applied. The wrapper is its own risk: ./gradlew executes a JAR from the repository before any safeguard runs."},
+  {e:"NuGet",l:".NET",t:2,acq:"n",bld:"y",
+   ctrl:"ExcludeAssets per package (build, buildTransitive, analyzers)",
+   note:"Modern PackageReference runs no install scripts &mdash; those were legacy packages.config. But packages inject MSBuild props and targets that execute during build, and analyzers load into the compiler process. The gate is per-package rather than global."},
+  {e:"Cargo",l:"Rust",t:2,acq:"n",bld:"y",
+   ctrl:"None &mdash; no flag on stable or nightly",
+   note:"build.rs runs as a native binary with full privileges, and procedural macros execute inside the compiler itself. package.build = false disables a build script only for the package declaring it; a consumer cannot set it for a dependency. Sandboxing was a 2024 project goal that did not continue. cargo-vet, cargo-crev and cargo-deny are review and policy tools, and none gates execution."}
+];
+
+const GCAT = {attack:"Attack technique",control:"Control &amp; practice",tools:"Tool category",
+  standards:"Standard &amp; framework",identity:"Identity &amp; credentials",data:"Vulnerability data",build:"Build &amp; packaging"};
+
+const GLOSSARY = [
+  {t:"Dependency confusion",c:"attack",d:"Registering an internal package name on a public registry so the resolver pulls the attacker&rsquo;s copy instead of the private one. Works because most package managers merge candidates from multiple indexes with no binding between a package and its source of truth."},
+  {t:"Typosquatting",c:"attack",d:"Publishing a package whose name is a plausible misspelling of a popular one, relying on install-time typos."},
+  {t:"Repo-jacking",c:"attack",d:"Claiming an abandoned or renamed source-control namespace that existing references still point at, so a redirect resolves to attacker-controlled code."},
+  {t:"Poisoned pipeline execution",c:"attack",d:"Obtaining code execution inside a CI job by manipulating something the workflow trusts &mdash; an unquoted branch name, a pull request from a fork running in a privileged context, or a build cache an untrusted job can write."},
+  {t:"Cache poisoning",c:"attack",d:"Writing a malicious entry into a shared build cache from a low-privilege job so a later privileged job restores it. The mechanism behind the Ultralytics compromise, where the release workflow built an artifact containing code never present in the repository."},
+  {t:"Tag mutation",c:"attack",d:"Force-updating a version tag to point at a different commit. Git tags are mutable references, so anything consuming a tag rather than a commit hash silently receives new content."},
+  {t:"Impostor commit",c:"attack",d:"Referencing a commit that exists in a fork rather than the upstream repository, so the hash looks legitimate and resolves, but the content was never reviewed upstream."},
+  {t:"Install script",c:"attack",d:"Dependency-authored code that a package manager runs at install time &mdash; an npm preinstall hook, a Python source distribution&rsquo;s setup.py, a Ruby gem&rsquo;s extconf.rb. It executes before any of the package&rsquo;s own code is imported, so merely resolving a dependency is enough to be compromised."},
+  {t:"Build script",c:"attack",d:"Dependency-authored code that runs at compile time rather than install time &mdash; a Rust build.rs, a Maven plugin, an MSBuild targets file shipped inside a NuGet package. Usually cannot be disabled, so the control is build isolation rather than configuration."},
+  {t:"Self-propagating worm",c:"attack",d:"Malware that uses credentials harvested from one victim to publish trojanized versions of packages that victim maintains, spreading without further attacker action. First achieved at scale in a package registry in September 2025."},
+  {t:"Blast radius",c:"attack",d:"How far a single compromise reaches. The practical goal of credential design: with short-lived tokens, a full CI compromise yields only what was live during the window rather than a durable credential set."},
+
+  {t:"Cooldown / minimum release age",c:"control",d:"Refusing to adopt a dependency version until it has been published for some minimum period. Observed exposure windows in recent campaigns ran two to five hours, so even a short delay clears them. pnpm v11 defaults to 24 hours; Renovate, Dependabot and npm all support it."},
+  {t:"Quarantine",c:"control",d:"The registry-side equivalent of a cooldown &mdash; a proxy holds newly published components out of builds until they age or pass analysis. The control that actually covers malicious-on-publish packages, which a CVE feed structurally cannot."},
+  {t:"Pinning",c:"control",d:"Referencing an immutable identifier rather than a moving one: a full commit hash instead of a tag, an image digest instead of a tag, a lockfile entry with an integrity hash instead of a version range."},
+  {t:"Lockfile",c:"control",d:"A generated file recording the exact resolved version and content hash of every dependency, direct and transitive, so installs are reproducible and substitution is detectable."},
+  {t:"Subresource integrity",c:"control",d:"A hash attribute on a script or stylesheet loaded from a third-party host, so the browser refuses content that does not match. The missing control in the Ledger incident, where applications loaded a floating version from a public CDN."},
+  {t:"Hermetic build",c:"control",d:"A build that declares all its inputs and runs with no network access, so nothing can be fetched or substituted mid-build."},
+  {t:"Reproducible build",c:"control",d:"A build that produces a bit-for-bit identical artifact from the same source, letting a third party verify the artifact matches the code. The only control that would have surfaced the SolarWinds implant, which injected between source and compilation."},
+  {t:"Ephemeral runner",c:"control",d:"A single-use CI executor destroyed after one job, so nothing an attacker leaves behind survives into the next build."},
+  {t:"Egress monitoring",c:"control",d:"Watching or allow-listing outbound network connections from a build runner. What actually detected the tj-actions compromise &mdash; an unexpected outbound endpoint, not code review."},
+  {t:"Least privilege",c:"control",d:"Scoping the token available to a workflow to the minimum needed, so a compromised step has nothing worth stealing."},
+  {t:"Admission control",c:"control",d:"Enforcement at deploy time that only signed and verified artifacts run. Without it an attestation is decoration, because nobody checks it."},
+  {t:"Namespace registration",c:"control",d:"Defensively claiming your internal package names on the public registry so nobody else can. The two-line fix for dependency confusion."},
+  {t:"Install-script allowlist",c:"control",d:"Deny dependency-authored install code by default and name the exceptions in version control, so each addition is a reviewable event. npm 12 allowScripts, pnpm allowBuilds, bun trustedDependencies, Composer allow-plugins."},
+
+  {t:"SAST",c:"tools",d:"Static application security testing &mdash; analyzing source code without running it. Says nothing about dependencies, which are the majority of shipped code."},
+  {t:"DAST",c:"tools",d:"Dynamic application security testing &mdash; probing a running instance. Contributes almost nothing to a CLI or a library, where fuzzing is the high-value analog."},
+  {t:"IAST and RASP",c:"tools",d:"Interactive testing instruments a running application to observe vulnerabilities during tests; runtime application self-protection uses the same instrumentation to block attacks in production."},
+  {t:"SCA",c:"tools",d:"Software composition analysis &mdash; matching your dependencies against vulnerability databases. Structurally a lagging indicator: it cannot flag malicious code before an advisory exists."},
+  {t:"ASPM",c:"tools",d:"Application security posture management &mdash; deduplicating findings across scanners, prioritizing by risk, and routing to owners. Adds no detection of its own; it is a throughput layer."},
+  {t:"CNAPP",c:"tools",d:"Cloud-native application protection platform &mdash; cloud posture, workload protection, and runtime detection in one product."},
+  {t:"ADR",c:"tools",d:"Application detection and response &mdash; runtime instrumentation that observes which code actually executes, used both to detect attacks and to filter vulnerability findings down to reachable ones."},
+  {t:"BCA",c:"tools",d:"Binary composition analysis &mdash; identifying components inside a compiled artifact where no source or manifest exists. The only way to validate an SBOM against the binary it claims to describe."},
+  {t:"Reachability analysis",c:"tools",d:"Determining whether vulnerable code is actually called rather than merely present. The difference between a handful of real findings and hundreds of theoretical ones."},
+  {t:"Taint analysis",c:"tools",d:"Tracing untrusted input through a program to see whether it reaches a dangerous operation without sanitization."},
+  {t:"Registry firewall",c:"tools",d:"A proxy in front of upstream package registries that applies policy before anything enters a build &mdash; blocking known-bad versions, quarantining new releases, enforcing license rules."},
+  {t:"Behavioral package analysis",c:"tools",d:"Scoring a package by what it can do rather than by known vulnerabilities &mdash; install scripts, network access, filesystem reads, obfuscation, and permission creep between versions. Detects novel malware that no advisory covers yet."},
+
+  {t:"SBOM",c:"standards",d:"Software bill of materials &mdash; a machine-readable inventory of everything in a build. Generated at build time it answers &lsquo;where is this component&rsquo; deterministically; inferred at runtime it answers only where you thought to look."},
+  {t:"CycloneDX and SPDX",c:"standards",d:"The two SBOM formats. CycloneDX is an ECMA standard developed by OWASP; SPDX comes from the Linux Foundation. Both are widely supported and inter-convertible."},
+  {t:"VEX",c:"standards",d:"Vulnerability exploitability exchange &mdash; a companion document stating whether a vulnerability in a listed component is actually exploitable in your product, so consumers are not chasing findings you have already assessed."},
+  {t:"SLSA",c:"standards",d:"Supply-chain Levels for Software Artifacts &mdash; a framework of build integrity levels. Build Level 2 means signed provenance from a hosted builder; Level 3 adds isolation between builds so one cannot influence another."},
+  {t:"Provenance and attestation",c:"standards",d:"A signed statement about how an artifact was produced &mdash; which source, which workflow, which commit. Critically it attests to identity, not correctness: three incidents in this document shipped validly attested malware."},
+  {t:"Sigstore",c:"standards",d:"Keyless signing infrastructure. Fulcio issues short-lived certificates against an OIDC identity, Rekor records signatures in a public transparency log, and cosign is the client. No long-lived signing key exists to steal."},
+  {t:"in-toto",c:"standards",d:"A CNCF-graduated framework for attesting each step of a supply chain, so the path from source to artifact can be verified end to end rather than only at the final signature."},
+  {t:"NIST SSDF",c:"standards",d:"Secure Software Development Framework, SP 800-218 &mdash; the practice catalogue US federal software attestation was built around. Referenced throughout this matrix as PO, PS, PW and RV practice identifiers."},
+  {t:"OWASP CI/CD Top 10",c:"standards",d:"A ranked list of CI/CD-specific risks, cited here as CICD-SEC-1 through 10. The clearest published taxonomy of pipeline attacks as distinct from application vulnerabilities."},
+  {t:"EU CRA",c:"standards",d:"Cyber Resilience Act, Regulation 2024/2847. Reporting obligations apply from September 2026 with a 24-hour early-warning clock; full obligations including SBOM in technical documentation apply from December 2027."},
+  {t:"SSDF attestation",c:"standards",d:"The US federal self-attestation that software was built following secure development practices. The government-wide mandate was rescinded in January 2026, but agencies may still require it individually and enterprise customers increasingly require it contractually."},
+
+  {t:"OIDC federation",c:"identity",d:"A CI job presents a short-lived signed token describing itself, and the target system exchanges it for a credential scoped to that job&rsquo;s duration. No standing secret exists to steal &mdash; the single highest-leverage control in this document."},
+  {t:"Trusted publishing",c:"identity",d:"Publishing to a package registry via OIDC rather than a long-lived API token. Removes the token as a theft target, but authenticates which workflow published, not what it built."},
+  {t:"NHI",c:"identity",d:"Non-human identity &mdash; service accounts, API tokens, OAuth grants, and increasingly AI agent identities. Distinct from secrets management: this is the inventory and ownership problem, not the storage problem."},
+  {t:"Session token replay",c:"identity",d:"Stealing an already-authenticated session cookie and reusing it. Bypasses multi-factor authentication entirely, because the attacker never performs a login and no challenge is ever issued."},
+  {t:"Secrets detection vs management",c:"identity",d:"Detection finds credentials that leaked into code. Management issues and stores them so they need not be in code at all. Both sit under the same OWASP risk but are separate controls with separate tooling and separate budgets."},
+
+  {t:"CVE",c:"data",d:"Common Vulnerabilities and Exposures &mdash; the identifier assigned to a publicly disclosed vulnerability. Note what it implies: an identifier exists only after disclosure, which is why CVE-based gating cannot stop malicious-on-publish packages."},
+  {t:"CVSS",c:"data",d:"Common Vulnerability Scoring System &mdash; a severity score from 0 to 10. Widely used for prioritization and widely criticized for it, since it describes worst-case severity rather than risk in your specific deployment."},
+  {t:"KEV",c:"data",d:"The Known Exploited Vulnerabilities catalogue &mdash; vulnerabilities with confirmed active exploitation. A far better prioritization signal than severity score alone."},
+  {t:"OSV",c:"data",d:"An open vulnerability database and schema designed for precise per-ecosystem version matching, rather than the vendor-oriented model of older databases."},
+
+  {t:"Shaded archive",c:"build",d:"A Java archive that repackages its dependencies inside itself, often rewriting package paths. Defeats filename-based scanning, which is why Log4Shell was so hard to inventory."},
+  {t:"Distroless image",c:"build",d:"A container base containing only what the application needs, with no shell and no package manager. Eliminates whole classes of vulnerability rather than reporting them."},
+  {t:"Image transformer",c:"build",d:"Tooling that profiles a running container to find what it actually uses, then strips everything else from your existing image. The alternative to swapping in a vendor catalog image, and the only option for bespoke or third-party images."},
+  {t:"Backported patch",c:"build",d:"A minimal fix applied at your current version rather than an upgrade. Avoids breaking changes, at the cost of owning a divergence from upstream until you catch up."},
+  {t:"Build input vs test data",c:"build",d:"Any file the build path reads is a build input and needs source-grade review, whatever its file type. Test fixtures the test suite reads are one risk class; test fixtures the build reads are another entirely, and almost nobody draws that line."},
+  {t:"MCP",c:"build",d:"Model Context Protocol &mdash; the interface standard connecting AI agents to external tools. A new supply chain surface, since an MCP server is third-party code publishing tool definitions an agent will act on."}
+];
+
+/* ---------- render glossary ---------- */
+(function(){
+  const list=document.getElementById("gloss-list");
+  list.innerHTML=GLOSSARY.map(g=>
+    '<div class="gterm" data-cat="'+g.c+'" data-txt="'+(g.t+' '+g.d).toLowerCase().replace(/"/g,'')+'">'+
+    '<span class="gcat">'+GCAT[g.c]+'</span><h3>'+g.t+'</h3><p>'+g.d+'</p></div>').join('');
+  const q=document.getElementById("gsearch"), cf=document.getElementById("gcat"), cnt=document.getElementById("gcount");
+  function apply(){
+    const s=q.value.trim().toLowerCase(), C=cf.value; let shown=0;
+    list.querySelectorAll(".gterm").forEach(el=>{
+      let ok=true;
+      if(s && el.dataset.txt.indexOf(s)===-1) ok=false;
+      if(C && el.dataset.cat!==C) ok=false;
+      el.style.display = ok ? "" : "none"; if(ok) shown++;
+    });
+    cnt.textContent = shown+" of "+GLOSSARY.length+" terms";
+  }
+  [q,cf].forEach(el=>el.addEventListener("input",apply));
+  apply();
+})();
+
+/* ---------- render ecosystems ---------- */
+(function(){
+  const t=document.getElementById("eco-table");
+  t.querySelector("thead").innerHTML='<tr><th>Ecosystem</th><th class="xh">On acquire</th><th class="xh">On build</th><th>Official control</th><th>Notes</th></tr>';
+  const gl={y:'&#9679;',n:'&mdash;',na:'n/a'};
+  const tt={y:'Dependency code executes',n:'Does not execute',na:'No separate phase'};
+  t.querySelector("tbody").innerHTML=ECOSYS.map(x=>
+    '<tr><td class="econame"><strong>'+x.e+'</strong>'+(x.l?'<span class="tvendor">'+x.l+'</span>':'')+
+      '<div style="margin-top:5px"><span class="tag">Tier '+x.t+'</span></div></td>'+
+    '<td class="xc"><span class="xm '+x.acq+'" title="'+tt[x.acq]+'">'+gl[x.acq]+'</span></td>'+
+    '<td class="xc"><span class="xm '+x.bld+'" title="'+tt[x.bld]+'">'+gl[x.bld]+'</span></td>'+
+    '<td class="ctrlc">'+x.ctrl+'</td>'+
+    '<td class="econote">'+x.note+'</td></tr>').join('');
+})();
+
+/* ---------- render matrix ---------- */
+(function(){
+  const t = document.getElementById("matrix-table");
+  t.querySelector("thead").innerHTML =
+    '<tr><th class="ln">#</th><th>Layer</th>' +
+    STAGES.map(s=>'<th class="stage">'+s[1]+'</th>').join('') +
+    '<th>Anchors</th><th>Residual risk &mdash; what it cannot catch</th></tr>';
+  const sym={p:['p','&#9679;','Primary gate'],s:['s','&#9678;','Supporting'],v:['v','&#9675;','Verify only']};
+  t.querySelector("tbody").innerHTML = LAYERS.map(L=>
+    '<tr><td class="ln num">'+L.n+'</td>'+
+    '<td class="layer-name"><strong>'+L.name+'</strong><span>'+L.what+'</span></td>'+
+    STAGES.map(s=>{
+      const v=L.s[s[0]];
+      return '<td class="cell">'+(v?'<span class="dot '+sym[v][0]+'" title="'+sym[v][2]+'">'+sym[v][1]+'</span>':'')+'</td>';
+    }).join('')+
+    '<td><span class="tag">'+L.ref.split(' &middot; ').join('</span><span class="tag">')+'</span></td>'+
+    '<td class="residual">'+L.res+'</td></tr>'
+  ).join('');
+})();
+
+/* ---------- render tools ---------- */
+(function(){
+  const lmap={}, smap={};
+  LAYERS.forEach(L=>{lmap[L.id]=L.n+". "+L.name.replace(/&amp;/g,'&'); smap[L.id]=L.n+" "+L.short;});
+
+  // Free to license, but NOT free to run on a private or commercial codebase.
+  const PUBLIC_ONLY = new Set(["CodeQL","Brakeman","Safety CLI","Docker Scout","JFrog Frogbot","Jit",
+    "Amazon Inspector","GCP Binary Authorization + Cloud Build","Cloud-native secret stores"]);
+  // Freemium or commercial rows whose free tier DOES cover private repositories.
+  const PRIVATE_FREE = new Set(["GitGuardian","Docker Hardened Images","Google Assured OSS","Akeyless",
+    "Operant AI","Lakera","FOSSA / FOSSology","Infisical","OpenBao"]);
+
+  function privOf(t){
+    if(t.dead) return "na";
+    if(PUBLIC_ONLY.has(t.n)) return "paid";
+    if(PRIVATE_FREE.has(t.n)) return "free";
+    if(t.c === "free") return "free";
+    return "paid";
+  }
+  const sel=document.getElementById("tlayer");
+  LAYERS.forEach(L=>{const o=document.createElement("option");o.value=L.id;o.innerHTML=L.n+". "+L.name;sel.appendChild(o);});
+
+  const tbl=document.getElementById("tools-table");
+  tbl.querySelector("thead").innerHTML='<tr><th>Tool</th><th>Layers covered</th><th>Cost model</th><th>Price signal</th><th>Notes &amp; flags</th></tr>';
+  const body=tbl.querySelector("tbody");
+
+  function row(t){
+    const pv=privOf(t);
+    const layers=t.l.length
+      ? t.l.map(id=>'<span class="tag" title="'+(lmap[id]||id)+'">'+(smap[id]||id)+'</span>').join('')
+      : '<span class="tag" style="opacity:.6">no security layer</span>';
+    const pillClass = t.dead ? 'ent' : t.c;
+    const pillText = t.dead ? 'Retired' : C[t.c];
+    let flags='';
+    if(t.dead) flags+='<div class="flag">Dead or deprecated &mdash; do not adopt.</div>';
+    if(t.flag) flags+='<div class="flag'+(t.fw===1?' warnf':'')+'">'+t.flag+'</div>';
+    return '<tr data-name="'+(t.n+' '+t.v).toLowerCase()+'" data-layers="'+t.l.join(' ')+'" data-cost="'+t.c+'" '+
+      'data-oss="'+(t.oss?1:0)+'" data-dead="'+(t.dead?1:0)+'" data-caution="'+(t.flag?1:0)+'" data-priv="'+pv+'">'+
+      '<td class="tname-cell"><span class="tname">'+t.n+'</span><span class="tvendor">'+t.v+'</span>'+
+        (pv==="free"?'<div style="margin-top:5px"><span class="pill free">Free on private repos</span></div>'
+         :(pv==="paid"&&t.oss?'<div style="margin-top:5px"><span class="pill freemium">Free for OSS only</span></div>':''))+'</td>'+
+      '<td class="tools-layers">'+layers+'</td>'+
+      '<td><span class="pill '+pillClass+'">'+pillText+'</span></td>'+
+      '<td class="price">'+t.p+'</td>'+
+      '<td class="note">'+(t.note||'')+flags+'</td></tr>';
+  }
+  body.innerHTML=TOOLS.map(row).join('');
+
+  const q=document.getElementById("tsearch"), fl=document.getElementById("tlayer"),
+        fc=document.getElementById("tcost"), fs=document.getElementById("tstatus"),
+        cnt=document.getElementById("tcount");
+
+  function apply(){
+    const s=q.value.trim().toLowerCase(), L=fl.value, C2=fc.value, S=fs.value;
+    let shown=0;
+    body.querySelectorAll("tr").forEach(tr=>{
+      let ok=true;
+      if(s && tr.dataset.name.indexOf(s)===-1) ok=false;
+      if(L && tr.dataset.layers.split(' ').indexOf(L)===-1) ok=false;
+      if(C2 && tr.dataset.cost!==C2) ok=false;
+      if(S==="privfree" && tr.dataset.priv!=="free") ok=false;
+      if(S==="privpaid" && tr.dataset.priv!=="paid") ok=false;
+      if(S==="ossonly" && !(tr.dataset.oss==="1" && tr.dataset.priv==="paid")) ok=false;
+      if(S==="dead" && tr.dataset.dead!=="1") ok=false;
+      if(S==="caution" && tr.dataset.caution!=="1") ok=false;
+      tr.style.display = ok ? "" : "none";
+      if(ok) shown++;
+    });
+    cnt.textContent = shown+" of "+TOOLS.length+" tools";
+  }
+  [q,fl,fc,fs].forEach(el=>el.addEventListener("input",apply));
+  apply();
+})();
+</script>

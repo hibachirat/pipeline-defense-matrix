@@ -372,10 +372,31 @@ footer{border-top:1px solid var(--line);background:var(--surface);margin-top:0}
 footer .wrap{padding:30px 24px 44px;color:var(--ink-3);font-size:12.5px;display:flex;flex-direction:column;gap:8px}
 footer a{color:var(--ink-2)}
 
+/* ---------- pipeline density strip (hero visual) ---------- */
+.pipeflow{display:flex;gap:2px;align-items:stretch;margin:20px 0 10px;padding:14px 16px 10px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow-x:auto}
+.pf-col{flex:1 1 0;min-width:60px;display:flex;flex-direction:column;align-items:center}
+.pf-num{height:19px;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:19px}
+.pf-bar{height:64px;width:100%;max-width:40px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px}
+.pf-seg{width:100%;border-radius:3px;min-height:2px}
+.pf-seg.p{background:var(--accent)}
+.pf-seg.s{background:var(--accent-2);opacity:.55}
+.pf-seg.v{background:var(--ink-3);opacity:.30}
+.pf-stage{height:28px;padding-top:6px;font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);text-align:center;line-height:1.2}
+.pf-arrow{display:flex;align-items:center;color:var(--ink-3);opacity:.45;font-size:14px;padding:0 1px}
+.pf-cap{font-size:13px;color:var(--ink-3);line-height:1.6;margin:0 0 22px}
+.pf-cap strong{color:var(--ink-2)}
+.pf-key{display:inline-flex;align-items:center;flex-wrap:wrap;gap:0}
+.pf-k{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 6px 0 14px;vertical-align:middle}
+.pf-k.p{background:var(--accent)}
+.pf-k.s{background:var(--accent-2);opacity:.55}
+.pf-k.v{background:var(--ink-3);opacity:.30}
+
 @media (max-width:640px){
   .wrap{padding:0 16px}
   section{padding:38px 0}
   .top .wrap{padding-top:32px;padding-bottom:28px}
+  .pf-col{min-width:58px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -428,6 +449,8 @@ footer a{color:var(--ink-2)}
       <div><span class="dot s">&#9678;</span> Supporting control</div>
       <div><span class="dot v">&#9675;</span> Verify / monitor only</div>
     </div>
+    <div class="pipeflow" id="pipeflow" role="img" aria-label="Bar chart: control layers acting at each pipeline stage"></div>
+    <p class="pf-cap"><strong>Reading down the columns.</strong> Enforcement concentrates at <strong>PR</strong> and <strong>Build</strong> (shift-left); <strong>Merge</strong> is a checkpoint, not a gate; <strong>Prod</strong> is the last-stand tail. The figure on each bar is that stage&rsquo;s primary gates. <span class="pf-key"><span class="pf-k p"></span>Primary <span class="pf-k s"></span>Supporting <span class="pf-k v"></span>Verify</span></p>
   </div>
 </section>
 
@@ -1533,6 +1556,26 @@ const GLOSSARY = [
     '<td><span class="tag">'+L.ref.split(' &middot; ').join('</span><span class="tag">')+'</span></td>'+
     '<td class="residual">'+L.res+'</td></tr>'
   ).join('');
+})();
+
+/* ---------- render pipeline density strip ---------- */
+(function(){
+  const el=document.getElementById("pipeflow"); if(!el) return;
+  const counts=STAGES.map(function(st){
+    const key=st[0]; let p=0,s=0,v=0;
+    LAYERS.forEach(function(L){const m=L.s[key]; if(m==="p")p++; else if(m==="s")s++; else if(m==="v")v++;});
+    return {label:st[1],p:p,s:s,v:v,total:p+s+v};
+  });
+  const maxTotal=Math.max.apply(null,counts.map(function(c){return c.total;}));
+  const H=64;
+  function seg(n,cls){return n?'<div class="pf-seg '+cls+'" style="height:'+(n/maxTotal*H).toFixed(1)+'px" title="'+n+' '+cls+'"></div>':'';}
+  el.innerHTML=counts.map(function(c,i){
+    return '<div class="pf-col">'+
+        '<div class="pf-num" title="'+c.p+' primary + '+c.s+' supporting + '+c.v+' verify">'+c.p+'</div>'+
+        '<div class="pf-bar">'+seg(c.p,'p')+seg(c.s,'s')+seg(c.v,'v')+'</div>'+
+        '<div class="pf-stage">'+c.label+'</div>'+
+      '</div>'+(i<counts.length-1?'<div class="pf-arrow">&rarr;</div>':'');
+  }).join('');
 })();
 
 /* ---------- render tools ---------- */

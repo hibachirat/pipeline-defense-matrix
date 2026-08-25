@@ -392,6 +392,10 @@ footer a{color:var(--ink-2)}
       <span class="chip">NIST SSDF 1.1</span>
       <span class="chip">EU CRA 2024/2847</span>
     </div>
+    <div class="tldr callout" style="margin-top:24px">
+      <h3>The short version</h3>
+      <p>No single control stops a supply-chain attack, so defense here is layered &mdash; and the layers that decide most incidents are <strong>architectural, not purchased</strong>. Of the fourteen documented incidents below, ten were preventable, and the deciding control was almost always free to license (pin by digest, hold no standing credentials, wait before adopting a new release, build from source control) and expensive to operate consistently across many teams. What a budget actually buys is <strong>enforcement and evidence</strong> at scale, not raw coverage. If you read one thing here, make it the <a href="#stacks">two reference stacks</a> &mdash; a $0 hardened OSS pipeline and a ~$140k/yr commercial one, both built on that principle.</p>
+    </div>
   </div>
 </header>
 
@@ -400,10 +404,10 @@ footer a{color:var(--ink-2)}
     <a href="#matrix">The Matrix</a>
     <a href="#tools">Tool Cross-Ref</a>
     <a href="#incidents">Case Studies</a>
+    <a href="#stacks">Reference Stacks</a>
     <a href="#cost">Cost Model</a>
     <a href="#coverage">Path Coverage</a>
     <a href="#ecosystems">Ecosystems</a>
-    <a href="#stacks">Reference Stacks</a>
     <a href="#traps">Traps</a>
     <a href="#evaluation">Evaluation</a>
     <a href="#compliance">Compliance Clock</a>
@@ -511,10 +515,50 @@ footer a{color:var(--ink-2)}
   </div>
 </section>
 
-<section id="cost">
+<section id="stacks">
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Section 04</span>
+      <h2>Two reference stacks</h2>
+      <p>Concrete builds rather than a shopping list. Both assume GitHub Actions; both apply the same principle &mdash; spend on the layers where free tools are genuinely weaker, use free tools everywhere else.</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <span class="kicker">Solo maintainer &middot; open source &middot; $0</span>
+        <h3>Hardened OSS release pipeline</h3>
+        <ul class="clean" style="margin-top:10px">
+          <li><strong>Source</strong> &mdash; FIDO2 hardware key, signed commits, branch protection applied to yourself, OpenSSF Scorecard</li>
+          <li><strong>Pipeline</strong> &mdash; zizmor + actionlint in PR, all actions pinned to commit SHA via pinact, Harden-Runner Community (free, unlimited public repos)</li>
+          <li><strong>Deps</strong> &mdash; vendored in-tree, hermetic build with network disabled, cargo-deny or a go.mod diff gate blocking new deps</li>
+          <li><strong>Scanning</strong> &mdash; govulncheck or cargo-audit in PR, osv-scanner nightly against the committed SBOM</li>
+          <li><strong>Malware</strong> &mdash; Socket free-for-OSS tier plus GuardDog</li>
+          <li><strong>Publish</strong> &mdash; cosign keyless via OIDC, GitHub artifact attestations for SLSA Build L2&ndash;L3, Syft SBOM attached to the release</li>
+          <li><strong>Fuzzing</strong> &mdash; native Go fuzzing, or ClusterFuzzLite if OSS-Fuzz eligibility is not met</li>
+          <li><strong>Credentials</strong> &mdash; zero standing PATs, OIDC only, ephemeral signing identity per run</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="kicker">Enterprise vendor &middot; 100 devs &middot; ~$140k/yr</span>
+        <h3>Commercial SaaS release pipeline</h3>
+        <ul class="clean" style="margin-top:10px">
+          <li><strong>Gateway</strong> &mdash; Sonatype Repository Firewall or JFrog Curation with a quarantine-new-releases policy, not just a CVE gate</li>
+          <li><strong>Source &amp; secrets</strong> &mdash; GitHub Secret Protection with push protection, GitGuardian if you need NHI governance</li>
+          <li><strong>SAST</strong> &mdash; Semgrep or GitHub Code Security; Opengrep if the Semgrep rule license is a problem</li>
+          <li><strong>Behavioral</strong> &mdash; Socket or Endor Labs for malicious-package detection with reachability</li>
+          <li><strong>Pipeline</strong> &mdash; StepSecurity Enterprise for runner egress control and Actions policy</li>
+          <li><strong>Artifacts</strong> &mdash; cosign or JFrog Evidence, SLSA Build L3 provenance, SBOM into technical documentation for CRA</li>
+          <li><strong>Deploy</strong> &mdash; Kyverno or Sigstore policy-controller so only verified images admit; Trivy or Aqua for image scanning</li>
+          <li><strong>Correlation</strong> &mdash; DefectDojo free, or an ASPM vendor once finding volume outgrows it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Section 05</span>
       <h2>What it costs to cover sixteen layers</h2>
       <p>Modelled on a 100-developer software vendor. Per-developer pricing is the only transparent segment of this market; every enterprise suite is quote-only, so those figures are ranges from published tiers and reported deal sizes, not list prices. Treat them as sizing, not quotes.</p>
     </div>
@@ -574,7 +618,7 @@ footer a{color:var(--ink-2)}
 <section id="coverage">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Section 05</span>
+      <span class="eyebrow">Section 06</span>
       <h2>What each path would actually have caught</h2>
       <p>The four spending paths scored against all fourteen incidents. The result is not the one a procurement process usually expects, so the caveat underneath the table matters as much as the table.</p>
     </div>
@@ -616,7 +660,7 @@ footer a{color:var(--ink-2)}
 <section id="ecosystems">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Section 06</span>
+      <span class="eyebrow">Section 07</span>
       <h2>Where each ecosystem executes dependency code</h2>
       <p>The formula&rsquo;s fourth property &mdash; disable lifecycle scripts &mdash; reads as npm advice, but it generalizes across every language, and the generalization is cleaner than the per-ecosystem mechanics. One question sorts them all: <strong>does acquiring or building a dependency execute dependency-authored code before you run your own program?</strong></p>
     </div>
@@ -663,46 +707,6 @@ footer a{color:var(--ink-2)}
       <h3>Prior art, so you need not invent the taxonomy</h3>
       <p>Ladisa, Plate, Martinez and Barais, <em>&ldquo;SoK: Taxonomy of Attacks on Open-Source Software Supply Chains,&rdquo;</em> IEEE Security &amp; Privacy 2023, is the best citation &mdash; it frames this exact axis and names &ldquo;prevent script execution&rdquo; and &ldquo;isolation of build steps&rdquo; as distinct safeguards. Duan et al., NDSS 2021, includes a per-registry comparison with an explicit install-hook row, though only for three interpreted-language registries. Ohm et al., DIMVA 2020, maps trigger points against a dataset of real malicious packages.</p>
       <p style="margin-top:10px">Worth knowing what does <em>not</em> cover this axis, since both get cited as though they do: the OpenSSF S2C2F framework and the OpenSSF and CISA &ldquo;Principles for Package Repository Security&rdquo; contain no requirement addressing install-time or build-time code execution. S2C2F is oriented to post-acquisition scanning, inventory and updating; the Principles are organized around authentication and authorization.</p>
-    </div>
-  </div>
-</section>
-
-<section id="stacks">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Section 07</span>
-      <h2>Two reference stacks</h2>
-      <p>Concrete builds rather than a shopping list. Both assume GitHub Actions; both apply the same principle &mdash; spend on the layers where free tools are genuinely weaker, use free tools everywhere else.</p>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <span class="kicker">Solo maintainer &middot; open source &middot; $0</span>
-        <h3>Hardened OSS release pipeline</h3>
-        <ul class="clean" style="margin-top:10px">
-          <li><strong>Source</strong> &mdash; FIDO2 hardware key, signed commits, branch protection applied to yourself, OpenSSF Scorecard</li>
-          <li><strong>Pipeline</strong> &mdash; zizmor + actionlint in PR, all actions pinned to commit SHA via pinact, Harden-Runner Community (free, unlimited public repos)</li>
-          <li><strong>Deps</strong> &mdash; vendored in-tree, hermetic build with network disabled, cargo-deny or a go.mod diff gate blocking new deps</li>
-          <li><strong>Scanning</strong> &mdash; govulncheck or cargo-audit in PR, osv-scanner nightly against the committed SBOM</li>
-          <li><strong>Malware</strong> &mdash; Socket free-for-OSS tier plus GuardDog</li>
-          <li><strong>Publish</strong> &mdash; cosign keyless via OIDC, GitHub artifact attestations for SLSA Build L2&ndash;L3, Syft SBOM attached to the release</li>
-          <li><strong>Fuzzing</strong> &mdash; native Go fuzzing, or ClusterFuzzLite if OSS-Fuzz eligibility is not met</li>
-          <li><strong>Credentials</strong> &mdash; zero standing PATs, OIDC only, ephemeral signing identity per run</li>
-        </ul>
-      </div>
-      <div class="card">
-        <span class="kicker">Enterprise vendor &middot; 100 devs &middot; ~$140k/yr</span>
-        <h3>Commercial SaaS release pipeline</h3>
-        <ul class="clean" style="margin-top:10px">
-          <li><strong>Gateway</strong> &mdash; Sonatype Repository Firewall or JFrog Curation with a quarantine-new-releases policy, not just a CVE gate</li>
-          <li><strong>Source &amp; secrets</strong> &mdash; GitHub Secret Protection with push protection, GitGuardian if you need NHI governance</li>
-          <li><strong>SAST</strong> &mdash; Semgrep or GitHub Code Security; Opengrep if the Semgrep rule license is a problem</li>
-          <li><strong>Behavioral</strong> &mdash; Socket or Endor Labs for malicious-package detection with reachability</li>
-          <li><strong>Pipeline</strong> &mdash; StepSecurity Enterprise for runner egress control and Actions policy</li>
-          <li><strong>Artifacts</strong> &mdash; cosign or JFrog Evidence, SLSA Build L3 provenance, SBOM into technical documentation for CRA</li>
-          <li><strong>Deploy</strong> &mdash; Kyverno or Sigstore policy-controller so only verified images admit; Trivy or Aqua for image scanning</li>
-          <li><strong>Correlation</strong> &mdash; DefectDojo free, or an ASPM vendor once finding volume outgrows it</li>
-        </ul>
-      </div>
     </div>
   </div>
 </section>

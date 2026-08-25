@@ -427,6 +427,27 @@ footer a{color:var(--ink-2)}
 .heat-key .k-wn{color:var(--warn)}
 .heat-key .k-ct{color:var(--crit)}
 
+/* ---------- defense-in-depth diagram ---------- */
+.ddwrap{margin:2px 0 8px;padding:16px 16px 8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.dds{display:block;width:100%;height:auto}
+.dds .slice{stroke-width:1.5}
+.dds .l1{fill:#2D7DD2;stroke:#1B5FA8}
+.dds .l2{fill:#F2A900;stroke:#C98A00}
+.dds .l3{fill:#17A2B8;stroke:#0F7C8C}
+.dds .l4{fill:#8367D8;stroke:#6A4FBF}
+.dds .l5{fill:#56B4E9;stroke:#2E97D4}
+.dds .case{stroke:var(--ground);stroke-width:6;fill:none;stroke-linecap:round}
+.dds .hole{fill:var(--surface);stroke:var(--line);stroke-width:1}
+.dds .slabel{fill:var(--ink-2);font:600 14px Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif}
+.dds .blocked{stroke:var(--ink);stroke-width:3;fill:none;stroke-linecap:round}
+.dds .through{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-linecap:round;stroke-dasharray:7 5}
+.dds .xm{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.dds .arw{fill:var(--ink-3)}
+.dds .alabel{fill:var(--ink-3);font:500 12px "IBM Plex Mono",ui-monospace,monospace}
+.dd-cap{font-size:13px;color:var(--ink-3);line-height:1.6;margin:12px 2px 0}
+.dd-cap strong{color:var(--ink-2)}
+.dd-cap em{color:var(--ink-2);font-style:italic}
+
 @media (max-width:640px){
   .wrap{padding:0 16px}
   section{padding:38px 0}
@@ -478,6 +499,35 @@ footer a{color:var(--ink-2)}
       <h2>Layers by pipeline stage</h2>
       <p>Rows are control layers, anchored to the CIS Software Supply Chain Security Guide's five categories and the OWASP CI/CD Top 10 rather than invented. Columns are pipeline stages. The residual column is the part that matters most: what this layer structurally cannot catch, and therefore what you are relying on a later layer to cover.</p>
     </div>
+    <div class="ddwrap">
+      <svg class="dds" viewBox="0 0 1000 290" role="img" aria-label="Defense in depth: five stacked control layers, each with gaps. Most attacks are caught by a layer; a rare path where every gap aligns reaches production.">
+        <rect class="slice l1" x="40" y="30" width="120" height="200" rx="10"/>
+        <rect class="slice l2" x="230" y="30" width="120" height="200" rx="10"/>
+        <rect class="slice l3" x="420" y="30" width="120" height="200" rx="10"/>
+        <rect class="slice l4" x="610" y="30" width="120" height="200" rx="10"/>
+        <rect class="slice l5" x="800" y="30" width="120" height="200" rx="10"/>
+        <circle class="hole" cx="100" cy="90" r="18"/><circle class="hole" cx="100" cy="180" r="18"/>
+        <circle class="hole" cx="290" cy="70" r="18"/><circle class="hole" cx="290" cy="150" r="18"/>
+        <circle class="hole" cx="480" cy="120" r="18"/><circle class="hole" cx="480" cy="200" r="18"/>
+        <circle class="hole" cx="670" cy="90" r="18"/><circle class="hole" cx="670" cy="160" r="18"/>
+        <circle class="hole" cx="860" cy="110" r="18"/><circle class="hole" cx="860" cy="190" r="18"/>
+        <polyline class="case" points="0,90 160,90 230,70 350,70 420,120 540,120 610,90 730,90 800,110 920,110 944,110"/>
+        <polyline class="through" points="0,90 160,90 230,70 350,70 420,120 540,120 610,90 730,90 800,110 920,110 944,110"/>
+        <polygon class="arw" points="944,101 968,110 944,119"/>
+        <text class="alabel" x="996" y="100" text-anchor="end">reaches production</text>
+        <polyline class="case" points="0,180 160,180 226,180"/>
+        <polyline class="blocked" points="0,180 160,180 226,180"/>
+        <line class="xm" x1="223" y1="171" x2="241" y2="189"/>
+        <line class="xm" x1="241" y1="171" x2="223" y2="189"/>
+        <text class="alabel" x="4" y="18">attack paths &rarr;</text>
+        <text class="slabel" x="100" y="256" text-anchor="middle">Source</text>
+        <text class="slabel" x="290" y="256" text-anchor="middle">Dependencies</text>
+        <text class="slabel" x="480" y="256" text-anchor="middle">Build &amp; pipeline</text>
+        <text class="slabel" x="670" y="256" text-anchor="middle">Artifacts &amp; images</text>
+        <text class="slabel" x="860" y="256" text-anchor="middle">Deploy &amp; runtime</text>
+      </svg>
+    </div>
+    <p class="dd-cap"><strong>No single layer is solid.</strong> Every control has a structural blind spot &mdash; its <em>residual</em>, the last column of the table below. Defense holds because those gaps rarely line up: what the source layer misses, dependency or build usually catches. The exceptions are the ones that made history &mdash; <strong>xz-utils</strong> and <strong>SolarWinds</strong> reached production because the gaps aligned the whole way, with a single control (build from source control; reproducible builds) sitting across the path.</p>
     <div class="scroller"><table id="matrix-table"><thead></thead><tbody></tbody></table></div>
     <div class="legend">
       <div><span class="dot p">&#9679;</span> Primary gate &mdash; blocks here</div>

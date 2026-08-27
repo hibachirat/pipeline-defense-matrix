@@ -11,6 +11,12 @@
 # pinned version rather than piped from a shell installer. Go verifies every
 # module against its checksum database and transparency log, so this avoids
 # the curl-into-shell pattern that made the 2021 Codecov compromise possible.
+#
+# That verification depends on proxy.golang.org and sum.golang.org, both of
+# which return intermittent stream errors. Each install therefore retries with
+# backoff. The retry is deliberately the only concession made: suppressing
+# checksum verification (GONOSUMDB, GOFLAGS=-insecure, GOPRIVATE) would remove
+# the property that justifies installing this way at all.
 name: Security
 
 on:
@@ -42,7 +48,16 @@ jobs:
       - name: Install actionlint
         env:
           ACTIONLINT_VERSION: v1.7.12
-        run: go install "github.com/rhysd/actionlint/cmd/actionlint@${ACTIONLINT_VERSION}"
+        run: |
+          for attempt in 1 2 3; do
+            if go install "github.com/rhysd/actionlint/cmd/actionlint@${ACTIONLINT_VERSION}"; then
+              exit 0
+            fi
+            echo "::warning::go install failed (attempt ${attempt}/3), retrying"
+            sleep $(( attempt * 20 ))
+          done
+          echo "::error::go install failed after 3 attempts"
+          exit 1
 
       - name: actionlint
         run: '"$(go env GOPATH)"/bin/actionlint -color'
@@ -64,7 +79,16 @@ jobs:
           GITLEAKS_VERSION: v8.30.1
         # The project moved to the gitleaks org but go.mod still declares the
         # original module path, so that is what `go install` must be given.
-        run: go install "github.com/zricethezav/gitleaks/v8@${GITLEAKS_VERSION}"
+        run: |
+          for attempt in 1 2 3; do
+            if go install "github.com/zricethezav/gitleaks/v8@${GITLEAKS_VERSION}"; then
+              exit 0
+            fi
+            echo "::warning::go install failed (attempt ${attempt}/3), retrying"
+            sleep $(( attempt * 20 ))
+          done
+          echo "::error::go install failed after 3 attempts"
+          exit 1
 
       - name: Scan
         run: '"$(go env GOPATH)"/bin/gitleaks git . --redact --verbose'

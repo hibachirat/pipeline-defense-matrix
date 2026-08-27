@@ -1,0 +1,122 @@
+# Applies this repository's own advice to this repository.
+#
+# Three checks, mapped to the seven properties in Section 05 of the page:
+#   1. Workflow static analysis  -> property 7 (lint workflows, least privilege)
+#   2. Secret detection          -> layer 3 (secrets detection)
+#   3. Inline script validation  -> the page is one HTML file with one <script>
+#      block; a syntax error there renders every table on the page empty, and
+#      nothing else in CI would catch it.
+#
+# Tooling note: actionlint and gitleaks are installed with `go install` at a
+# pinned version rather than piped from a shell installer. Go verifies every
+# module against its checksum database and transparency log, so this avoids
+# the curl-into-shell pattern that made the 2021 Codecov compromise possible.
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * 1' # Mondays, 06:17 UTC — stale findings surface without a push
+
+permissions: {}
+
+jobs:
+  workflows:
+    name: Workflow static analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read          # zizmor reads workflow definitions
+      security-events: write # upload SARIF to the Security tab
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: zizmor
+        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+
+      - name: Install actionlint
+        env:
+          ACTIONLINT_VERSION: v1.7.12
+        run: go install "github.com/rhysd/actionlint/cmd/actionlint@${ACTIONLINT_VERSION}"
+
+      - name: actionlint
+        run: "$(go env GOPATH)/bin/actionlint -color"
+
+  secrets:
+    name: Secret detection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks scans history, not just the working tree
+          persist-credentials: false
+
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: v8.30.1
+        run: go install "github.com/gitleaks/gitleaks/v8@${GITLEAKS_VERSION}"
+
+      - name: Scan
+        run: "$(go env GOPATH)/bin/gitleaks git . --redact --verbose"
+
+  page:
+    name: Validate page
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Extract the inline script
+        run: |
+          python3 - <<'PY'
+          import re, sys, pathlib
+          html = pathlib.Path("index.html").read_text(encoding="utf-8")
+          blocks = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S)
+          if not blocks:
+              sys.exit("No <script> block found in index.html")
+          pathlib.Path("_inline.js").write_text("\n".join(blocks), encoding="utf-8")  # noqa
+          joined = "\n".join(blocks)
+          print("extracted %d script block(s), %d chars" % (len(blocks), len(joined)))
+          PY
+
+      - name: Check JavaScript syntax
+        run: node --check _inline.js
+
+      - name: Check the page still declares what it claims
+        run: |
+          python3 - <<'PY'
+          import re, sys, pathlib
+          html = pathlib.Path("index.html").read_text(encoding="utf-8")
+          problems = []
+
+          sections = re.findall(r'<section id="([a-z]+)"', html)
+          nav = re.findall(r'<a href="#([a-z]+)"', html)
+          for target in nav:
+              if target not in sections:
+                  problems.append(f"nav link #{target} has no matching section")
+
+          numbers = [int(n) for n in re.findall(r'>Section (\d+)<', html)]
+          if numbers != list(range(1, len(numbers) + 1)):
+              problems.append(f"section numbering is not sequential: {numbers}")
+
+          for name in ("LAYERS", "TOOLS", "INCIDENTS", "COVER", "FORMULA",
+                       "ECOSYS", "GLOSSARY"):
+              if f"const {name} = [" not in html:
+                  problems.append(f"data array {name} is missing")
+
+          if problems:
+              sys.exit("\n".join(problems))
+          print(f"ok — {len(sections)} sections, {len(nav)} nav links, all arrays present")
+          PY

@@ -672,7 +672,7 @@ footer a{color:var(--ink-2)}
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Section 05</span>
-      <h2>What it costs to cover sixteen layers</h2>
+      <h2>What it costs to cover twenty-one layers</h2>
       <p>Modelled on a 100-developer software vendor. Per-developer pricing is the only transparent segment of this market; every enterprise suite is quote-only, so those figures are ranges from published tiers and reported deal sizes, not list prices. Treat them as sizing, not quotes.</p>
     </div>
     <div class="cost-grid">
@@ -748,7 +748,7 @@ footer a{color:var(--ink-2)}
     <div style="margin-top:22px" class="callout crit">
       <h3>Read this table correctly &mdash; it is not an argument against buying tools</h3>
       <p>Path A scores highest because the decisive control in most of these incidents was <em>architectural rather than purchased</em>: pin by digest, hold no standing credentials, wait before adopting a new version, build from source control. Those cost nothing to license. What the table measures is <strong>available capability, not achieved capability</strong> &mdash; every Path A control is free to adopt and expensive to operate consistently across many teams, with no vendor to escalate to and no report to hand an auditor. One further correction for a commercial codebase: Path A&rsquo;s <em>prevention</em> holds on private repositories, because pinning, cooldowns, disabled install scripts, and building from source control are self-hosted or procedural. Its <em>detection</em> degrades, because runner egress monitoring and the deepest free SAST engine are free only on public repositories. Assume the free path costs something once the repositories are private.</p>
-      <p style="margin-top:10px">The genuinely surprising column is <strong>D</strong>. The enterprise suites miss the entire CI/CD pipeline security cluster, because none of the large AppSec platforms analyze workflow definitions or monitor runners. The two most recent pipeline compromises on this list &mdash; a poisoned build cache and retargeted version tags &mdash; are invisible to a quarter-million-dollar platform and are caught by tools that cost nothing. If you buy Path D, budget separately for that gap.</p>
+      <p style="margin-top:10px">The genuinely surprising column is <strong>D</strong>. The enterprise suites miss the entire CI/CD pipeline security cluster. Be precise about why, because the objection is easy: all three integrate <em>extensively</em> with CI/CD &mdash; they ship actions and plugins for every major platform. What they do not do is treat the pipeline as the asset. None of them analyzes a workflow definition for template injection, excessive token scope, or unpinned references, and none monitors what a runner does while a job executes. Pipeline posture is covered in this market, but by the ASPM specialists &mdash; Cycode, Legit, Ox, Arnica &mdash; which are a separate purchase from the suite, and are not what Path D buys. The two most recent pipeline compromises on this list &mdash; a poisoned build cache and retargeted version tags &mdash; are invisible to a quarter-million-dollar platform and are caught by tools that cost nothing. If you buy Path D, budget separately for that gap.</p>
     </div>
 
     <div class="sec-head" style="margin-top:44px">
@@ -1087,7 +1087,7 @@ const TOOLS = [
   {n:"Datadog Code Security",v:"Datadog",l:["sast","sca","run","log"],c:"ent",p:"Platform pricing",note:"Wins by default in Datadog-standardized shops thanks to the pipeline-to-production telemetry tie-in."},
 
   // ===== Developer-first =====
-  {n:"Snyk",v:"Snyk",l:["sast","sca","cont","iac","aspm","remed"],c:"perdev",p:"Team from $25/dev/mo; Ignite $1,260/yr/dev",note:"Free tier caps at 5 projects. No true DAST.",flag:"Vendor risk: roughly 90 layoffs in 2026, dim IPO prospects, inconclusive PE talks. Weigh acquisition risk on multi-year commitments.",fw:1},
+  {n:"Snyk",v:"Snyk",l:["sast","sca","cont","iac","aspm","remed"],c:"perdev",p:"Team from $25/dev/mo; Ignite $1,260/yr/dev",note:"Free tier caps at 5 projects. No true DAST.",flag:"This market consolidates fast &mdash; Wiz, CyberArk, Protect AI, Phylum, Bearer, Tromzo and Kondukto all changed hands within two years. Weigh continuity risk on any multi-year commitment to an independent vendor, and confirm who owns your tool before renewal rather than after.",fw:1},
   {n:"Semgrep",v:"Semgrep",l:["sast","sca","secdet","mal"],c:"perdev",p:"Teams $30/contributor/mo; Secrets $15",note:"Free tier: 10 contributors, 10 repos. Custom rule authoring is the differentiator.",flag:"Registry rules moved to a restrictive license in Dec 2024 &mdash; internal, non-competing, non-SaaS use only. Opengrep is the escape hatch.",fw:1},
   {n:"Socket.dev",v:"Socket",l:["mal","sca","secdet","sbom","gate","ai"],c:"perdev",p:"Team $25/dev/mo (min 5); Business $50",oss:1,note:"Free for open source, with complimentary Team accounts on request. Capability and permission-creep detection is the core strength. Acquired Secure Annex Apr 2026, extending to browser, IDE, and AI-tool extensions."},
   {n:"Aikido Security",v:"Aikido",l:["sca","sast","secdet","cont","iac","dast","mal","run","base","remed"],c:"perdev",p:"Basic $300/mo, Pro/Advanced $600/mo",note:"Widest layer coverage per dollar. Acquired Root.io Jun 2026, adding agentic backported patching and a 2,000+ pre-remediated hardened image catalog. Plan-based rather than purely per-dev."},
@@ -1344,7 +1344,7 @@ const COVER = [
    why:"Platform-native gets a Dependabot alert after the fact rather than a block at install."},
   {k:"tj-actions",y:"2025",dec:"SHA-pinned actions, runner egress monitoring",
    A:"f",B:"p",C:"f",D:"n",
-   why:"The enterprise suite misses this entirely &mdash; CI/CD workflow security is not in any of the big AppSec platforms. Free pinning tools prevent it; StepSecurity is what actually detected it."},
+   why:"The enterprise suite misses this entirely: the big AppSec platforms scan code travelling through the pipeline, not the pipeline definition itself. Free pinning tools prevent it; StepSecurity is what actually detected it."},
   {k:"Ultralytics",y:"2024",dec:"Workflow static analysis, no untrusted cache in release builds",
    A:"f",B:"n",C:"f",D:"n",
    why:"zizmor flags this exact injection pattern for nothing. Neither the platform SKU nor the enterprise suite looks at workflow definitions this way."},
@@ -1534,7 +1534,7 @@ const GLOSSARY = [
   {t:"Self-propagating worm",c:"attack",d:"Malware that uses credentials harvested from one victim to publish trojanized versions of packages that victim maintains, spreading without further attacker action. First achieved at scale in a package registry in September 2025."},
   {t:"Blast radius",c:"attack",d:"How far a single compromise reaches. The practical goal of credential design: with short-lived tokens, a full CI compromise yields only what was live during the window rather than a durable credential set."},
 
-  {t:"Cooldown / minimum release age",c:"control",d:"Refusing to adopt a dependency version until it has been published for some minimum period. Observed exposure windows in recent campaigns ran two to five hours, so even a short delay clears them. pnpm v11 defaults to 24 hours; Renovate, Dependabot and npm all support it."},
+  {t:"Cooldown / minimum release age",c:"control",d:"Refusing to adopt a dependency version until it has been published for some minimum period. Observed exposure windows in recent campaigns ran two to five hours, so even a short delay clears them. pnpm v11 turns it on by default at 1,440 minutes &mdash; one day &mdash; and also flipped blockExoticSubdeps on, refusing transitive dependencies that resolve outside the registry; Renovate, Dependabot and npm all support a cooldown too."},
   {t:"Quarantine",c:"control",d:"The registry-side equivalent of a cooldown &mdash; a proxy holds newly published components out of builds until they age or pass analysis. The control that actually covers malicious-on-publish packages, which a CVE feed structurally cannot."},
   {t:"Pinning",c:"control",d:"Referencing an immutable identifier rather than a moving one: a full commit hash instead of a tag, an image digest instead of a tag, a lockfile entry with an integrity hash instead of a version range."},
   {t:"Lockfile",c:"control",d:"A generated file recording the exact resolved version and content hash of every dependency, direct and transitive, so installs are reproducible and substitution is detectable."},

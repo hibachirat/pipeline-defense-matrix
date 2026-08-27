@@ -1,0 +1,23 @@
+# Actions are the only dependency this repository has, and they are pinned to
+# commit SHAs. Dependabot proposes each bump as a reviewable diff so a pin
+# change is a deliberate act rather than a silent one.
+#
+# The cooldown implements property 3 from the page: wait before adopting a new
+# version. Recent worm campaigns were detected and unpublished within two to
+# five hours, so a seven-day window clears them without human involvement.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns:
+          - "*"
